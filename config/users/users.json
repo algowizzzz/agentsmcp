@@ -1,0 +1,57 @@
+{
+  "users": [
+    {
+      "user_id": "admin",
+      "username": "admin",
+      "full_name": "System Administrator",
+      "email": "admin@abhikarta.com",
+      "role": "admin",
+      "approved_tools": [
+        "*"
+      ],
+      "approved_agents": [
+        "*"
+      ],
+      "approved_dags": [
+        "*"
+      ],
+      "password": "admin123"
+    },
+    {
+      "user_id": "user1",
+      "username": "user1",
+      "full_name": "Ashutosh Sinha",
+      "email": "john@example.com",
+      "role": "user",
+      "approved_tools": [
+        "yahoo_finance_get_stock_price",
+        "echo_mcp_tool_echo"
+      ],
+      "approved_agents": [
+        "echo_agent"
+      ],
+      "approved_dags": [
+        "simple_sequential"
+      ],
+      "password": "user1"
+    },
+    {
+      "user_id": "user2",
+      "username": "user2",
+      "full_name": "Saad Ahmed",
+      "email": "jane@example.com",
+      "role": "user",
+      "approved_tools": [
+        "*"
+      ],
+      "approved_agents": [
+        "echo_agent"
+      ],
+      "approved_dags": [
+        "parallel_processing",
+        "simple_sequential"
+      ],
+      "password": "user2"
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "name": "filesystem_tool",
+  "description": "File system operations for reading, writing, and listing files",
+  "module": "tools.filesystem_tool.FileSystemTool",
+  "enabled": true,
+  "config": {
+    "allowed_extensions": [
+      ".py",
+      ".js",
+      ".ts",
+      ".jsx",
+      ".tsx",
+      ".java",
+      ".c",
+      ".cpp",
+      ".h",
+      ".md",
+      ".json",
+      ".xml",
+      ".yaml",
+      ".yml",
+      ".txt",
+      ".sql"
+    ],
+    "max_file_size": 10485760
+  }
+}
+

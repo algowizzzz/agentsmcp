@@ -1,0 +1,96 @@
+{
+  "dag_id": "parallel_processing",
+  "name": "Parallel Processing Workflow",
+  "description": "An 8-node workflow demonstrating parallel execution",
+  "nodes": [
+    {
+      "node_id": "init_workflow",
+      "node_type": "agent",
+      "agent_id": "echo_mcp_tool_echo",
+      "config": {
+        "input": {
+          "input": "Initializing parallel processing workflow..."
+        }
+      },
+      "dependencies": []
+    },
+    {
+      "node_id": "split_data",
+      "node_type": "agent",
+      "agent_id": "echo_mcp_tool_echo",
+      "config": {
+        "input": {
+          "input": "Splitting data into multiple chunks..."
+        }
+      },
+      "dependencies": ["init_workflow"]
+    },
+    {
+      "node_id": "process_chunk_1",
+      "node_type": "agent",
+      "agent_id": "echo_mcp_tool_echo",
+      "config": {
+        "input": {
+          "input": "Processing chunk 1..."
+        }
+      },
+      "dependencies": ["split_data"]
+    },
+    {
+      "node_id": "process_chunk_2",
+      "node_type": "agent",
+      "agent_id": "echo_mcp_tool_echo",
+      "config": {
+        "input": {
+          "input": "Processing chunk 2..."
+        }
+      },
+      "dependencies": ["split_data"]
+    },
+    {
+      "node_id": "process_chunk_3",
+      "node_type": "agent",
+      "agent_id": "echo_mcp_tool_echo",
+      "config": {
+        "input": {
+          "input": "Processing chunk 3..."
+        }
+      },
+      "dependencies": ["split_data"]
+    },
+    {
+      "node_id": "merge_results",
+      "node_type": "agent",
+      "agent_id": "echo_mcp_tool_echo",
+      "config": {
+        "input": {
+          "input": "Merging results from parallel processing..."
+        }
+      },
+      "dependencies": ["process_chunk_1", "process_chunk_2", "process_chunk_3"]
+    },
+    {
+      "node_id": "validate_merged",
+      "node_type": "agent",
+      "agent_id": "echo_mcp_tool_echo",
+      "config": {
+        "input": {
+          "input": "Validating merged results..."
+        }
+      },
+      "dependencies": ["merge_results"]
+    },
+    {
+      "node_id": "finalize",
+      "node_type": "agent",
+      "agent_id": "echo_mcp_tool_echo",
+      "config": {
+        "input": {
+          "input": "Finalizing workflow and saving output..."
+        }
+      },
+      "dependencies": ["validate_merged"]
+    }
+  ],
+  "start_nodes": ["init_workflow"]
+}

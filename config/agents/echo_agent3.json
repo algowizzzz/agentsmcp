@@ -1,0 +1,8 @@
+{
+  "agent_id": "echo_agent3",
+  "name": "echo_agent3",
+  "description": "Echo a message",
+  "module": "agents.echo_agent.EchoAgent",
+  "config": {},
+  "enabled": true
+}

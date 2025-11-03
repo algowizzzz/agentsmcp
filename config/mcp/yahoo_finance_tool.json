@@ -1,0 +1,25 @@
+{
+  "mcp_url": "http://localhost:8000",
+  "name": "yahoo_finance",
+  "module": "tools.common_tools.YahooFinanceTool",
+  "max_hits": 1000,
+  "max_hit_interval": 10,
+  "tool_description": {
+    "tools": [
+      {
+        "name": "get_stock_price",
+        "description": "Get stock price",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "symbol": {
+              "type": "string",
+              "description": "Stock symbol (e.g., AAPL)"
+            }
+          },
+          "required": ["symbol"]
+        }
+      }
+    ]
+  }
+}

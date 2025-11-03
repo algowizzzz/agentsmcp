@@ -1,0 +1,14 @@
+{
+  "name": "section_drafting_tool",
+  "description": "Drafts documentation sections using AI and templates",
+  "module": "tools.section_drafting_tool.SectionDraftingTool",
+  "enabled": true,
+  "config": {
+    "default_template": "bmo_model_documentation_template",
+    "templates_dir": "data/templates",
+    "prompts_dir": "data/prompts",
+    "use_mock": false,
+    "provider": "anthropic",
+    "model": "claude-sonnet-4.5"
+  }
+}

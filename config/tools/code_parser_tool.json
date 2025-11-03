@@ -1,0 +1,8 @@
+{
+  "name": "code_parser_tool",
+  "description": "Parse Python code into AST structures with functions, classes, and metadata",
+  "module": "tools.code_parser_tool.CodeParserTool",
+  "enabled": true,
+  "config": {}
+}
+

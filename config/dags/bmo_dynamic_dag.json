@@ -1,0 +1,392 @@
+{
+  "dag_id": "bmo_dynamic_dag",
+  "name": "Dynamic BMO Standard Model Documentation",
+  "description": "Auto-generated from template: BMO Standard Model Documentation. Adapts to template changes automatically.",
+  "nodes": [
+    {
+      "node_id": "scan_codebase",
+      "node_type": "tool",
+      "config": {
+        "tool_name": "filesystem_tool",
+        "input": {
+          "action": "list_directory",
+          "path": "{codebase_path}",
+          "extensions": [
+            ".py",
+            ".js",
+            ".ts",
+            ".java",
+            ".go",
+            ".md",
+            ".json"
+          ],
+          "recursive": true
+        }
+      },
+      "dependencies": []
+    },
+    {
+      "node_id": "parse_all_files",
+      "node_type": "tool",
+      "config": {
+        "tool_name": "code_parser_tool",
+        "input": {
+          "action": "analyze_structure",
+          "files": "{scan_codebase.result.files}"
+        }
+      },
+      "dependencies": [
+        "scan_codebase"
+      ]
+    },
+    {
+      "node_id": "generate_file_summaries",
+      "node_type": "tool",
+      "config": {
+        "tool_name": "llm_summarization_tool",
+        "input": {
+          "action": "hierarchical_summary",
+          "file_summaries": "{parse_all_files.result.summaries}",
+          "use_mock": false
+        }
+      },
+      "dependencies": [
+        "parse_all_files"
+      ]
+    },
+    {
+      "node_id": "draft_executive_summary",
+      "node_type": "tool",
+      "config": {
+        "tool_name": "section_drafting_tool",
+        "input": {
+          "action": "draft_section",
+          "section_id": "executive_summary",
+          "template_name": "{template_name}",
+          "context": {
+            "hierarchical_summary": "{generate_file_summaries.result.hierarchical_summary}",
+            "metadata": "{metadata}"
+          },
+          "use_mock": false
+        }
+      },
+      "dependencies": [
+        "generate_file_summaries"
+      ]
+    },
+    {
+      "node_id": "draft_introduction",
+      "node_type": "tool",
+      "config": {
+        "tool_name": "section_drafting_tool",
+        "input": {
+          "action": "draft_section",
+          "section_id": "introduction",
+          "template_name": "{template_name}",
+          "context": {
+            "hierarchical_summary": "{generate_file_summaries.result.hierarchical_summary}",
+            "metadata": "{metadata}"
+          },
+          "use_mock": false
+        }
+      },
+      "dependencies": [
+        "generate_file_summaries"
+      ]
+    },
+    {
+      "node_id": "draft_methodology",
+      "node_type": "tool",
+      "config": {
+        "tool_name": "section_drafting_tool",
+        "input": {
+          "action": "draft_section",
+          "section_id": "methodology",
+          "template_name": "{template_name}",
+          "context": {
+            "hierarchical_summary": "{generate_file_summaries.result.hierarchical_summary}",
+            "metadata": "{metadata}",
+            "file_summaries": "{parse_all_files.result.summaries}"
+          },
+          "use_mock": false
+        }
+      },
+      "dependencies": [
+        "generate_file_summaries"
+      ]
+    },
+    {
+      "node_id": "draft_data",
+      "node_type": "tool",
+      "config": {
+        "tool_name": "section_drafting_tool",
+        "input": {
+          "action": "draft_section",
+          "section_id": "data",
+          "template_name": "{template_name}",
+          "context": {
+            "hierarchical_summary": "{generate_file_summaries.result.hierarchical_summary}",
+            "metadata": "{metadata}",
+            "file_summaries": "{parse_all_files.result.summaries}"
+          },
+          "use_mock": false
+        }
+      },
+      "dependencies": [
+        "generate_file_summaries"
+      ]
+    },
+    {
+      "node_id": "draft_implementation",
+      "node_type": "tool",
+      "config": {
+        "tool_name": "section_drafting_tool",
+        "input": {
+          "action": "draft_section",
+          "section_id": "implementation",
+          "template_name": "{template_name}",
+          "context": {
+            "hierarchical_summary": "{generate_file_summaries.result.hierarchical_summary}",
+            "metadata": "{metadata}",
+            "file_summaries": "{parse_all_files.result.summaries}"
+          },
+          "use_mock": false
+        }
+      },
+      "dependencies": [
+        "generate_file_summaries"
+      ]
+    },
+    {
+      "node_id": "draft_validation",
+      "node_type": "tool",
+      "config": {
+        "tool_name": "section_drafting_tool",
+        "input": {
+          "action": "draft_section",
+          "section_id": "validation",
+          "template_name": "{template_name}",
+          "context": {
+            "hierarchical_summary": "{generate_file_summaries.result.hierarchical_summary}",
+            "metadata": "{metadata}"
+          },
+          "use_mock": false
+        }
+      },
+      "dependencies": [
+        "generate_file_summaries"
+      ]
+    },
+    {
+      "node_id": "draft_reporting",
+      "node_type": "tool",
+      "config": {
+        "tool_name": "section_drafting_tool",
+        "input": {
+          "action": "draft_section",
+          "section_id": "reporting",
+          "template_name": "{template_name}",
+          "context": {
+            "hierarchical_summary": "{generate_file_summaries.result.hierarchical_summary}",
+            "metadata": "{metadata}"
+          },
+          "use_mock": false
+        }
+      },
+      "dependencies": [
+        "generate_file_summaries"
+      ]
+    },
+    {
+      "node_id": "draft_governance",
+      "node_type": "tool",
+      "config": {
+        "tool_name": "section_drafting_tool",
+        "input": {
+          "action": "draft_section",
+          "section_id": "governance",
+          "template_name": "{template_name}",
+          "context": {
+            "hierarchical_summary": "{generate_file_summaries.result.hierarchical_summary}",
+            "metadata": "{metadata}"
+          },
+          "use_mock": false
+        }
+      },
+      "dependencies": [
+        "generate_file_summaries"
+      ]
+    },
+    {
+      "node_id": "draft_limitations_overall",
+      "node_type": "tool",
+      "config": {
+        "tool_name": "section_drafting_tool",
+        "input": {
+          "action": "draft_section",
+          "section_id": "limitations_overall",
+          "template_name": "{template_name}",
+          "context": {
+            "hierarchical_summary": "{generate_file_summaries.result.hierarchical_summary}",
+            "metadata": "{metadata}"
+          },
+          "use_mock": false
+        }
+      },
+      "dependencies": [
+        "generate_file_summaries"
+      ]
+    },
+    {
+      "node_id": "draft_conclusion",
+      "node_type": "tool",
+      "config": {
+        "tool_name": "section_drafting_tool",
+        "input": {
+          "action": "draft_section",
+          "section_id": "conclusion",
+          "template_name": "{template_name}",
+          "context": {
+            "hierarchical_summary": "{generate_file_summaries.result.hierarchical_summary}",
+            "metadata": "{metadata}"
+          },
+          "use_mock": false
+        }
+      },
+      "dependencies": [
+        "generate_file_summaries"
+      ]
+    },
+    {
+      "node_id": "draft_appendix_glossary",
+      "node_type": "tool",
+      "config": {
+        "tool_name": "section_drafting_tool",
+        "input": {
+          "action": "draft_section",
+          "section_id": "appendix_glossary",
+          "template_name": "{template_name}",
+          "context": {
+            "hierarchical_summary": "{generate_file_summaries.result.hierarchical_summary}",
+            "metadata": "{metadata}"
+          },
+          "use_mock": false
+        }
+      },
+      "dependencies": [
+        "generate_file_summaries"
+      ]
+    },
+    {
+      "node_id": "draft_appendix_code_manifest",
+      "node_type": "tool",
+      "config": {
+        "tool_name": "section_drafting_tool",
+        "input": {
+          "action": "draft_section",
+          "section_id": "appendix_code_manifest",
+          "template_name": "{template_name}",
+          "context": {
+            "hierarchical_summary": "{generate_file_summaries.result.hierarchical_summary}",
+            "metadata": "{metadata}"
+          },
+          "use_mock": false
+        }
+      },
+      "dependencies": [
+        "generate_file_summaries"
+      ]
+    },
+    {
+      "node_id": "assemble_document",
+      "node_type": "tool",
+      "config": {
+        "tool_name": "document_assembler_tool",
+        "input": {
+          "action": "assemble_document",
+          "template_name": "{template_name}",
+          "sections": {
+            "executive_summary": "{draft_executive_summary.result}",
+            "introduction": "{draft_introduction.result}",
+            "methodology": "{draft_methodology.result}",
+            "data": "{draft_data.result}",
+            "implementation": "{draft_implementation.result}",
+            "validation": "{draft_validation.result}",
+            "reporting": "{draft_reporting.result}",
+            "governance": "{draft_governance.result}",
+            "limitations_overall": "{draft_limitations_overall.result}",
+            "conclusion": "{draft_conclusion.result}",
+            "appendix_glossary": "{draft_appendix_glossary.result}",
+            "appendix_code_manifest": "{draft_appendix_code_manifest.result}"
+          },
+          "metadata": "{metadata}",
+          "output_path": null
+        }
+      },
+      "dependencies": [
+        "draft_executive_summary",
+        "draft_introduction",
+        "draft_methodology",
+        "draft_data",
+        "draft_implementation",
+        "draft_validation",
+        "draft_reporting",
+        "draft_governance",
+        "draft_limitations_overall",
+        "draft_conclusion",
+        "draft_appendix_glossary",
+        "draft_appendix_code_manifest"
+      ]
+    },
+    {
+      "node_id": "write_final_doc",
+      "node_type": "tool",
+      "config": {
+        "tool_name": "filesystem_tool",
+        "input": {
+          "action": "write_file",
+          "file_path": "{output_path}",
+          "content": "{assemble_document.result.document}"
+        }
+      },
+      "dependencies": [
+        "assemble_document"
+      ]
+    }
+  ],
+  "start_nodes": [
+    "scan_codebase"
+  ],
+  "parameters": {
+    "codebase_path": {
+      "description": "Path to the codebase to document",
+      "required": true,
+      "type": "string",
+      "example": "/path/to/project"
+    },
+    "output_path": {
+      "description": "Path to write final documentation",
+      "required": false,
+      "type": "string",
+      "default": "/tmp/abhikarta_bmo_dynamic_dag_output.md"
+    },
+    "template_name": {
+      "description": "Template to use for documentation structure",
+      "required": false,
+      "type": "string",
+      "default": "bmo_model_documentation_template"
+    },
+    "metadata": {
+      "description": "Project metadata (name, version, authors, etc.)",
+      "required": false,
+      "type": "object",
+      "default": {
+        "doc_id": "AUTO-GENERATED",
+        "model_name": "Unknown Model",
+        "doc_version": "1.0",
+        "status": "Draft",
+        "publication_date": "AUTO"
+      }
+    }
+  }
+}

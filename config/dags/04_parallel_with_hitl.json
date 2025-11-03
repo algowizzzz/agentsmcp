@@ -1,0 +1,116 @@
+{
+  "dag_id": "parallel_with_hitl",
+  "name": "Parallel Processing with Human Review",
+  "description": "A 10-node workflow with parallel branches and HITL approval",
+  "nodes": [
+    {
+      "node_id": "initialize",
+      "node_type": "agent",
+      "agent_id": "echo_mcp_tool_echo",
+      "config": {
+        "input": {
+          "input": "Initializing complex workflow..."
+        }
+      },
+      "dependencies": []
+    },
+    {
+      "node_id": "analyze_requirements",
+      "node_type": "agent",
+      "agent_id": "echo_mcp_tool_echo",
+      "config": {
+        "input": {
+          "input": "Analyzing business requirements..."
+        }
+      },
+      "dependencies": ["initialize"]
+    },
+    {
+      "node_id": "branch_a_task1",
+      "node_type": "agent",
+      "agent_id": "echo_mcp_tool_echo",
+      "config": {
+        "input": {
+          "input": "Branch A: Executing task 1..."
+        }
+      },
+      "dependencies": ["analyze_requirements"]
+    },
+    {
+      "node_id": "branch_a_task2",
+      "node_type": "agent",
+      "agent_id": "echo_mcp_tool_echo",
+      "config": {
+        "input": {
+          "input": "Branch A: Executing task 2..."
+        }
+      },
+      "dependencies": ["branch_a_task1"]
+    },
+    {
+      "node_id": "branch_b_task1",
+      "node_type": "agent",
+      "agent_id": "echo_mcp_tool_echo",
+      "config": {
+        "input": {
+          "input": "Branch B: Executing task 1..."
+        }
+      },
+      "dependencies": ["analyze_requirements"]
+    },
+    {
+      "node_id": "branch_b_task2",
+      "node_type": "agent",
+      "agent_id": "echo_mcp_tool_echo",
+      "config": {
+        "input": {
+          "input": "Branch B: Executing task 2..."
+        }
+      },
+      "dependencies": ["branch_b_task1"]
+    },
+    {
+      "node_id": "consolidate_results",
+      "node_type": "agent",
+      "agent_id": "echo_mcp_tool_echo",
+      "config": {
+        "input": {
+          "input": "Consolidating results from both branches..."
+        }
+      },
+      "dependencies": ["branch_a_task2", "branch_b_task2"]
+    },
+    {
+      "node_id": "human_review",
+      "node_type": "human_in_loop",
+      "agent_id": null,
+      "config": {
+        "message": "Please review the consolidated results and approve to continue"
+      },
+      "dependencies": ["consolidate_results"]
+    },
+    {
+      "node_id": "apply_changes",
+      "node_type": "agent",
+      "agent_id": "echo_mcp_tool_echo",
+      "config": {
+        "input": {
+          "input": "Applying approved changes..."
+        }
+      },
+      "dependencies": ["human_review"]
+    },
+    {
+      "node_id": "complete_workflow",
+      "node_type": "agent",
+      "agent_id": "echo_mcp_tool_echo",
+      "config": {
+        "input": {
+          "input": "Workflow completed successfully!"
+        }
+      },
+      "dependencies": ["apply_changes"]
+    }
+  ],
+  "start_nodes": ["initialize"]
+}

@@ -1,0 +1,63 @@
+{
+  "dag_id": "simple_sequential",
+  "name": "Simple Sequential Workflow",
+  "description": "A basic sequential workflow with 5 steps for data processing",
+  "nodes": [
+    {
+      "node_id": "fetch_data",
+      "node_type": "agent",
+      "agent_id": "echo_mcp_tool_echo",
+      "config": {
+        "input": {
+          "input": "Fetching data from source..."
+        }
+      },
+      "dependencies": []
+    },
+    {
+      "node_id": "validate_data",
+      "node_type": "agent",
+      "agent_id": "echo_mcp_tool_echo",
+      "config": {
+        "input": {
+          "input": "Validating data format and integrity..."
+        }
+      },
+      "dependencies": ["fetch_data"]
+    },
+    {
+      "node_id": "transform_data",
+      "node_type": "agent",
+      "agent_id": "echo_mcp_tool_echo",
+      "config": {
+        "input": {
+          "input": "Transforming data to target format..."
+        }
+      },
+      "dependencies": ["validate_data"]
+    },
+    {
+      "node_id": "enrich_data",
+      "node_type": "agent",
+      "agent_id": "echo_mcp_tool_echo",
+      "config": {
+        "input": {
+          "input": "Enriching data with additional information..."
+        }
+      },
+      "dependencies": ["transform_data"]
+    },
+    {
+      "node_id": "save_data",
+      "node_type": "agent",
+      "agent_id": "echo_mcp_tool_echo",
+      "config": {
+        "input": {
+          "input": "Saving processed data to storage..."
+        }
+      },
+      "dependencies": ["enrich_data"]
+    }
+  ],
+  "start_nodes": ["fetch_data"]
+}

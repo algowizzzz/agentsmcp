@@ -1,0 +1,61 @@
+{
+  "dag_id": "simple_doc_test",
+  "name": "Simple Documentation Test",
+  "description": "Test DAG to verify tool integration for documentation workflow",
+  "nodes": [
+    {
+      "node_id": "load_files",
+      "node_type": "tool",
+      "config": {
+        "tool_name": "filesystem_tool",
+        "input": {
+          "action": "list_directory",
+          "path": "/Users/saadahmed/Desktop/AI_BMO/Model-App-Documentaion/MonteCarloPFE",
+          "extensions": [".py"],
+          "recursive": true
+        }
+      },
+      "dependencies": []
+    },
+    {
+      "node_id": "read_first_file",
+      "node_type": "tool",
+      "config": {
+        "tool_name": "filesystem_tool",
+        "input": {
+          "action": "read_file",
+          "file_path": "/Users/saadahmed/Desktop/AI_BMO/Model-App-Documentaion/MonteCarloPFE/README.md"
+        }
+      },
+      "dependencies": ["load_files"]
+    },
+    {
+      "node_id": "summarize_file",
+      "node_type": "tool",
+      "config": {
+        "tool_name": "llm_summarization_tool",
+        "input": {
+          "action": "summarize_file",
+          "file_path": "README.md",
+          "content": "Sample content for testing",
+          "use_mock": true
+        }
+      },
+      "dependencies": ["read_first_file"]
+    },
+    {
+      "node_id": "write_output",
+      "node_type": "tool",
+      "config": {
+        "tool_name": "filesystem_tool",
+        "input": {
+          "action": "write_file",
+          "file_path": "/tmp/abhikarta_test_summary.txt",
+          "content": "Documentation test completed successfully!"
+        }
+      },
+      "dependencies": ["summarize_file"]
+    }
+  ],
+  "start_nodes": ["load_files"]
+}

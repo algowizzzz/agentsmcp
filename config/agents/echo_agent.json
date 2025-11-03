@@ -1,0 +1,8 @@
+{
+  "agent_id": "echo_agent",
+  "name": "Echo Agent",
+  "description": "Simple echo agent that returns the input",
+  "module": "agents.echo_agent.EchoAgent",
+  "config": {},
+  "enabled": true
+}

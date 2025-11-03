@@ -1,0 +1,58 @@
+{
+    "name": "Custom Summary Template",
+    "version": "1.0",
+    "prompts": {
+        "hierarchical_summary_prompt_path": "",
+        "hierarchical_summary_prompt_text": "You are the BMO AI Documentation Assistant for Models and Code. Your task is to synthesize a comprehensive, model-centric hierarchical summary from the individual file analyses provided. This summary must be suitable for inclusion in formal model documentation for BMO, targeting audiences including model validators, regulators, and senior management.\n\nINDIVIDUAL FILE ANALYSIS SUMMARIES:\n{file_summaries}\n\n**Hierarchical Model Documentation Requirements:**\n\nBased on the provided file summaries, construct a hierarchical summary that elucidates the model's architecture and functionality. Use clear, crisp, and formal language. Cover purpose/design, key modules, data & control flow, dependencies, patterns, and limitations.\n\nHIERARCHICAL SUMMARY:\n",
+        "master_prompt_text": "You will draft one documentation section for a regulator-ready model document.\n\nContext available to you:\n- Section title: {{section_title}}\n- Section requirements: {{section_requirements}}\n- Repository summary: {{repo_summary}}\n- Relevant file insights: {{file_summaries}}\n- Metadata: {{metadata}}\n\nInstructions:\n- Produce markdown with heading \"## {{section_title}}\".\n- Be precise and concise; prefer short paragraphs and bullet points.\n- Ground all statements in the provided summaries; avoid speculation.\n- If information is not applicable or missing, write \"N/A\" with a brief reason.\n- Keep within {{max_words}} words when provided."
+    },
+    "sections": [
+        {
+            "id": "overview",
+            "title": "Overview",
+            "required": true,
+            "description": "High-level overview of the codebase",
+            "subsections": [
+                {
+                    "id": "purpose",
+                    "title": "Purpose",
+                    "required": true
+                },
+                {
+                    "id": "architecture",
+                    "title": "Architecture",
+                    "required": true
+                }
+            ]
+        },
+        {
+            "id": "components",
+            "title": "Key Components",
+            "required": true,
+            "description": "Detailed description of major code components",
+            "subsections": [
+                {
+                    "id": "classes",
+                    "title": "Classes",
+                    "required": true
+                },
+                {
+                    "id": "functions",
+                    "title": "Functions",
+                    "required": true
+                }
+            ]
+        },
+        {
+            "id": "relationships",
+            "title": "Component Relationships",
+            "required": true,
+            "description": "How different parts of the code interact"
+        }
+    ],
+    "metadata": {
+        "author": "Documentation Agent",
+        "last_updated": "2024-03-21",
+        "description": "Template for generating structured code summaries"
+    }
+} 

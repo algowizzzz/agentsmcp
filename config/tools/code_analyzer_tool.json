@@ -1,0 +1,8 @@
+{
+  "name": "code_analyzer_tool",
+  "description": "Analyzes code for language detection, dependencies, and functional blocks",
+  "module": "tools.code_analyzer_tool.CodeAnalyzerTool",
+  "enabled": true,
+  "config": {}
+}
+

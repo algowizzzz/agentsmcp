@@ -1,0 +1,11 @@
+{
+  "name": "llm_summarization_tool",
+  "description": "LLM-based code summarization with mock and Claude support",
+  "module": "tools.llm_summarization_tool.LLMSummarizationTool",
+  "enabled": true,
+  "config": {
+    "prompts_dir": "data/prompts",
+    "default_mock_mode": true
+  }
+}
+

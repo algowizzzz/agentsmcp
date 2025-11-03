@@ -1,0 +1,11 @@
+{
+  "name": "cache_manager_tool",
+  "description": "Manages caching of LLM results and expensive operations",
+  "module": "tools.cache_manager_tool.CacheManagerTool",
+  "enabled": true,
+  "config": {
+    "cache_db_path": "data/cache.db",
+    "default_ttl": 86400
+  }
+}
+

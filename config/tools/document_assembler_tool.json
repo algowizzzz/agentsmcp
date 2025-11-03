@@ -1,0 +1,12 @@
+{
+  "name": "document_assembler_tool",
+  "description": "Assembles sections into final documentation",
+  "module": "tools.document_assembler_tool.DocumentAssemblerTool",
+  "enabled": true,
+  "config": {
+    "output_format": "markdown",
+    "include_toc": true,
+    "include_metadata": true,
+    "toc_depth": 3
+  }
+}

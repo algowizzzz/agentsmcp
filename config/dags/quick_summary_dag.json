@@ -1,0 +1,50 @@
+{
+  "dag_id": "quick_summary_dag",
+  "name": "Quick Summary DAG",
+  "description": "Fast codebase overview - lists all code files",
+  "nodes": [
+    {
+      "node_id": "scan_codebase",
+      "node_type": "tool",
+      "config": {
+        "tool_name": "filesystem_tool",
+        "input": {
+          "action": "list_directory",
+          "path": "{codebase_path}",
+          "extensions": [".py", ".js", ".ts", ".java", ".go"],
+          "recursive": true
+        }
+      },
+      "dependencies": []
+    },
+    {
+      "node_id": "write_summary_doc",
+      "node_type": "tool",
+      "config": {
+        "tool_name": "filesystem_tool",
+        "input": {
+          "action": "write_json",
+          "file_path": "{output_path}",
+          "data": "{scan_codebase.result}"
+        }
+      },
+      "dependencies": ["scan_codebase"]
+    }
+  ],
+  "start_nodes": ["scan_codebase"],
+  "parameters": {
+    "codebase_path": {
+      "description": "Path to the codebase to analyze",
+      "required": true,
+      "type": "string",
+      "example": "/path/to/project"
+    },
+    "output_path": {
+      "description": "Path to write summary file",
+      "required": false,
+      "type": "string",
+      "default": "/tmp/abhikarta_quick_summary.md"
+    }
+  }
+}
+

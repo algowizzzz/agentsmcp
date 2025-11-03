@@ -1,0 +1,10 @@
+{
+  "name": "template_manager_tool",
+  "description": "Manage and validate BMO documentation templates",
+  "module": "tools.template_manager_tool.TemplateManagerTool",
+  "enabled": true,
+  "config": {
+    "templates_dir": "data/templates"
+  }
+}
+

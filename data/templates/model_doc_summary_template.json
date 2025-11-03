@@ -1,0 +1,68 @@
+{
+  "name": "Model Documentation Summary",
+  "version": "1.0",
+  "description": "Concise 5-page model documentation template. Streamlined version of BMO Standard Model Documentation for quick reviews, status updates, and executive summaries. Focuses on essential information only.",
+  "metadata_fields": [
+    {"id": "doc_id", "title": "Document ID", "type": "text"},
+    {"id": "model_name", "title": "Model Name", "type": "text"},
+    {"id": "model_version", "title": "Version", "type": "text"},
+    {"id": "status", "title": "Status", "type": "text", "options": ["Draft", "Review", "Approved"]},
+    {"id": "date", "title": "Date", "type": "date"},
+    {"id": "author", "title": "Author", "type": "text"}
+  ],
+  "prompts": {
+    "hierarchical_summary_prompt_path": "",
+    "hierarchical_summary_prompt_text": "You are the BMO AI Documentation Assistant for Models and Code. Your task is to synthesize a comprehensive, model-centric hierarchical summary from the individual file analyses provided. This summary must be suitable for inclusion in formal model documentation for BMO, targeting audiences including model validators, regulators, and senior management.\n\nINDIVIDUAL FILE ANALYSIS SUMMARIES:\n{file_summaries}\n\n**Hierarchical Model Documentation Requirements:**\n\nBased on the provided file summaries, construct a hierarchical summary that elucidates the model's architecture and functionality. Use clear, crisp, and formal language. The summary must cover the following aspects in a structured manner:\n\n1.  **Overall Model Purpose and Design Philosophy:**\n    *   Start with a concise statement of the model's primary objective (e.g., PFE calculation, market risk assessment, fraud detection).\n    *   Briefly describe the overall design approach or paradigm (e.g., Monte Carlo simulation-based, modular microservices, rule-based engine).\n\n2.  **Key Functional Blocks/Modules:**\n    *   Identify and group related files into logical functional blocks or modules (e.g., Data Ingestion & Validation, Simulation Engine, Core Calculation Logic, Reporting & Output Generation, Configuration Management).\n    *   For each functional block:\n        *   State its overarching purpose and responsibilities within the model.\n        *   List the key constituent files/components that contribute to this block.\n\n3.  **Data Flow and Processing Sequence:**\n    *   Describe the end-to-end flow of data through the model.\n    *   Explain how data is ingested, processed by various functional blocks, transformed, and ultimately used to produce outputs.\n    *   Highlight critical data hand-offs between modules.\n\n4.  **Control Flow and Orchestration:**\n    *   Explain how the different parts of the model are orchestrated or how execution flows.\n    *   Identify any main driver scripts or central coordination logic.\n\n5.  **Key Inter-Module Dependencies and Interactions:**\n    *   Clearly articulate the most important dependencies and interaction patterns between the identified functional blocks/modules.\n    *   Explain how they rely on each other for data or functionality.\n\n6.  **Significant Architectural Patterns or Design Choices:**\n    *   Note any prominent architectural patterns employed (e.g., use of specific configuration files for parameters, dedicated reporting modules, separation of concerns between data handling and calculation).\n\n7.  **Synthesized Model-Level Assumptions and Limitations:**\n    *   Based on the file-specific summaries, synthesize and list any overarching assumptions that appear to apply at the model level.\n    *   Similarly, consolidate and highlight any significant limitations of the model as a whole that can be inferred from the collective behavior of its components.\n\n**Output Format:**\nStructure the hierarchical summary logically with clear headings for each of the points above (1-7). The summary should provide a coherent narrative of the model's structure and operation, not just a list of files.\n\nHIERARCHICAL SUMMARY:\n",
+    "master_prompt_text": "You will draft a single section for a concise model documentation.\n\nContext:\n- Section title: {{section_title}}\n- Section requirements: {{section_requirements}}\n- Repository summary: {{repo_summary}}\n- Relevant file insights: {{file_summaries}}\n- Metadata: {{metadata}}\n\nInstructions:\n- Output markdown with heading \"## {{section_title}}\".\n- Audience: senior risk stakeholders and validators; be clear, audit-ready, and concise.\n- Use short paragraphs and bullets; ground statements in the provided summaries; avoid speculation.\n- If not applicable, write \"N/A\" with a one-line reason.\n- Aim to stay within {{max_words}} words."
+  },
+  "sections": [
+    {
+      "id": "executive_summary",
+      "title": "Executive Summary",
+      "description": "Brief overview (0.5 page max). Summarize: model purpose, key approach, primary findings, critical limitations, and main recommendations. Target audience: senior stakeholders. Keep to 2-3 paragraphs.",
+      "required": true
+    },
+    {
+      "id": "overview",
+      "title": "1. Model Overview",
+      "description": "Combined introduction and methodology (1 page max). Cover: business problem, scope, high-level approach, key assumptions, and theoretical basis. Be concise - bullet points encouraged.",
+      "required": true,
+      "subsections": [
+        {"id": "overview_purpose", "title": "1.1. Purpose & Scope", "description": "What problem does this solve? What is in/out of scope? 2-3 sentences max.", "required": true},
+        {"id": "overview_approach", "title": "1.2. Methodology", "description": "High-level approach, key algorithms/techniques, critical assumptions. Bullet points preferred. No detailed equations.", "required": true}
+      ]
+    },
+    {
+      "id": "implementation",
+      "title": "2. Implementation",
+      "description": "Technical implementation details (1.5-2 pages max). Focus on system architecture, key components, data flow, and main parameters. Reference code files but don't duplicate content.",
+      "required": true,
+      "subsections": [
+        {"id": "impl_architecture", "title": "2.1. System Architecture", "description": "High-level component diagram or description. What are the main modules and how do they interact? 1 paragraph + optional simple diagram.", "required": true},
+        {"id": "impl_components", "title": "2.2. Key Components", "description": "Brief description of 3-5 most important code modules/files. For each: name, purpose, inputs/outputs. Use table format if possible.", "required": true, "dynamic_content_source": "file_summaries"},
+        {"id": "impl_data", "title": "2.3. Data & Configuration", "description": "Primary data sources, key configuration parameters, data quality approach. Bullet points. 3-5 items max.", "required": true}
+      ]
+    },
+    {
+      "id": "results_validation",
+      "title": "3. Results & Validation",
+      "description": "Model outputs and validation approach (0.5-1 page max). What does the model produce? How was it tested? Summary of validation findings.",
+      "required": true,
+      "subsections": [
+        {"id": "results_outputs", "title": "3.1. Model Outputs", "description": "What files/reports does the model generate? Format and key metrics. List format. 3-4 lines max.", "required": true},
+        {"id": "results_validation", "title": "3.2. Validation Summary", "description": "Testing approach (unit tests, integration tests, backtesting). Pass/fail status. Key findings in 2-3 bullet points.", "required": true}
+      ]
+    },
+    {
+      "id": "limitations_recommendations",
+      "title": "4. Limitations & Recommendations",
+      "description": "Critical limitations and next steps (0.5-1 page max). What are the main risks/weaknesses? What should be done next? Prioritize top 3-5 items each.",
+      "required": true,
+      "subsections": [
+        {"id": "limitations_key", "title": "4.1. Key Limitations", "description": "Top 3-5 limitations/risks. For each: issue, impact, mitigation (if any). Bullet points.", "required": true},
+        {"id": "recommendations_next", "title": "4.2. Recommendations", "description": "Top 3-5 recommended actions for improvement or future development. Prioritized list.", "required": true}
+      ]
+    }
+  ]
+}
+
