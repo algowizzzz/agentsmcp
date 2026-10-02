@@ -1,0 +1,521 @@
+{
+  "id": "sector_events",
+  "version": "1.0.0",
+  "name": "Sector event discovery",
+  "description": "Phase 1 of sector-to-customer news intelligence: discover recent news for one country and sector, extract and cluster material events, rank the top events and corroborate them on trusted domains. Produces research intelligence for analyst review, never credit decisions.",
+  "inputs": {
+    "country": {
+      "type": "string",
+      "default": "USA"
+    },
+    "sector": {
+      "type": "string",
+      "default": "Hedge Funds"
+    },
+    "results_per_query": {
+      "type": "integer",
+      "default": 5,
+      "description": "Tavily max_results per discovery query (1-20)."
+    },
+    "max_articles": {
+      "type": "integer",
+      "default": 15,
+      "description": "Articles kept after de-duplication."
+    },
+    "max_events": {
+      "type": "integer",
+      "default": 5,
+      "description": "Events kept after ranking (3-5 recommended)."
+    },
+    "max_validations": {
+      "type": "integer",
+      "default": 3,
+      "description": "Events corroborated with one trusted-domain search each."
+    },
+    "trusted_domains": {
+      "type": "array",
+      "default": [
+        "reuters.com",
+        "sec.gov",
+        "federalreserve.gov",
+        "treasury.gov",
+        "cftc.gov",
+        "finra.org"
+      ]
+    }
+  },
+  "budgets": {
+    "max_tool_calls": 10,
+    "max_llm_calls": 4,
+    "max_steps": 30
+  },
+  "defaults": {
+    "provider": "anthropic",
+    "model": "claude-opus-5-5"
+  },
+  "nodes": [
+    {
+      "id": "build_queries",
+      "type": "transform",
+      "description": "Discovery queries for the news search. Edit or extend freely.",
+      "input": [
+        "{{ inputs.country }} {{ inputs.sector }} major developments leverage liquidity regulation rates",
+        "{{ inputs.country }} {{ inputs.sector }} major market risks latest",
+        "{{ inputs.country }} {{ inputs.sector }} regulation SEC CFTC latest",
+        "{{ inputs.country }} {{ inputs.sector }} fixed income rates repo funding latest"
+      ],
+      "steps": [
+        {
+          "op": "dedupe",
+          "normalize": "text"
+        }
+      ]
+    },
+    {
+      "id": "discover_news",
+      "type": "for_each",
+      "description": "Broad discovery with Tavily news search (server-side lookback is 7 days).",
+      "items": "{{ nodes.build_queries }}",
+      "as": "query",
+      "max_items": 4,
+      "concurrency": 4,
+      "body": {
+        "type": "tool",
+        "server": "sajha",
+        "tool": "tavily_news_search",
+        "args": {
+          "query": "{{ query }}",
+          "max_results": "{{ inputs.results_per_query }}",
+          "include_answer": false
+        }
+      }
+    },
+    {
+      "id": "collect_articles",
+      "type": "transform",
+      "description": "Flatten, drop duplicate URLs and titles, keep the best-scored articles and number them.",
+      "input": "{{ nodes.discover_news }}",
+      "steps": [
+        {
+          "op": "flatten",
+          "path": "results"
+        },
+        {
+          "op": "filter",
+          "when": {
+            "left": "{{ item.url | default(null) }}",
+            "op": "truthy"
+          }
+        },
+        {
+          "op": "dedupe",
+          "key": "url",
+          "normalize": "url"
+        },
+        {
+          "op": "dedupe",
+          "key": "title",
+          "normalize": "text"
+        },
+        {
+          "op": "sort",
+          "by": [
+            {
+              "key": "score",
+              "order": "desc"
+            }
+          ]
+        },
+        {
+          "op": "limit",
+          "n": "{{ inputs.max_articles }}"
+        },
+        {
+          "op": "enumerate",
+          "field": "ref",
+          "start": 1
+        },
+        {
+          "op": "map",
+          "fields": {
+            "ref": "{{ item.ref }}",
+            "title": "{{ item.title | default('') }}",
+            "url": "{{ item.url }}",
+            "publisher": "{{ item.url | domain }}",
+            "published_date": "{{ item.published_date | default(null) }}",
+            "score": "{{ item.score | default(null) }}",
+            "excerpt": "{{ item.content | default('') | truncate(700) }}"
+          }
+        }
+      ]
+    },
+    {
+      "id": "check_articles",
+      "type": "router",
+      "routes": [
+        {
+          "when": {
+            "left": "{{ nodes.collect_articles | length }}",
+            "op": "gt",
+            "right": 0
+          },
+          "goto": "extract_events"
+        }
+      ],
+      "default": "no_news"
+    },
+    {
+      "id": "extract_events",
+      "type": "llm",
+      "description": "Cluster articles into distinct events and assess materiality.",
+      "system_file": "prompts/extract_events_system.md",
+      "prompt_file": "prompts/extract_events.md",
+      "max_tokens": 8000,
+      "output_schema": {
+        "type": "object",
+        "required": [
+          "events",
+          "excluded_refs"
+        ],
+        "properties": {
+          "events": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "type": "object",
+              "required": [
+                "headline",
+                "summary",
+                "country",
+                "sector",
+                "subsectors_or_strategies",
+                "event_type",
+                "materiality",
+                "materiality_rationale",
+                "direction",
+                "impact_channels",
+                "keywords",
+                "source_refs",
+                "validation_query",
+                "confidence"
+              ],
+              "properties": {
+                "headline": {
+                  "type": "string"
+                },
+                "summary": {
+                  "type": "string"
+                },
+                "country": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "sector": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "subsectors_or_strategies": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "event_type": {
+                  "type": "string",
+                  "enum": [
+                    "Market Risk",
+                    "Liquidity/Funding",
+                    "Regulatory",
+                    "Credit",
+                    "Business/Corporate",
+                    "Operational",
+                    "Structural",
+                    "Macro/Policy",
+                    "Other"
+                  ]
+                },
+                "materiality": {
+                  "type": "string",
+                  "enum": [
+                    "high",
+                    "medium",
+                    "low"
+                  ]
+                },
+                "materiality_rationale": {
+                  "type": "string"
+                },
+                "direction": {
+                  "type": "string",
+                  "enum": [
+                    "positive",
+                    "negative",
+                    "mixed",
+                    "neutral",
+                    "unknown"
+                  ]
+                },
+                "impact_channels": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "keywords": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "source_refs": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer"
+                  },
+                  "minItems": 1
+                },
+                "validation_query": {
+                  "type": "string"
+                },
+                "confidence": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              }
+            }
+          },
+          "excluded_refs": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "rank_events",
+      "type": "transform",
+      "description": "Drop low materiality, rank by materiality then confidence, attach cited articles.",
+      "input": "{{ nodes.extract_events.events }}",
+      "steps": [
+        {
+          "op": "filter",
+          "when": {
+            "left": "{{ item.materiality }}",
+            "op": "ne",
+            "right": "low"
+          }
+        },
+        {
+          "op": "sort",
+          "by": [
+            {
+              "key": "materiality",
+              "order": "desc",
+              "rank": {
+                "high": 3,
+                "medium": 2,
+                "low": 1
+              }
+            },
+            {
+              "key": "confidence",
+              "order": "desc"
+            }
+          ]
+        },
+        {
+          "op": "limit",
+          "n": "{{ inputs.max_events }}"
+        },
+        {
+          "op": "enumerate",
+          "field": "rank",
+          "start": 1
+        },
+        {
+          "op": "lookup",
+          "from": "{{ nodes.collect_articles }}",
+          "field": "source_refs",
+          "match": "ref",
+          "as": "sources"
+        },
+        {
+          "op": "map",
+          "merge": true,
+          "fields": {
+            "event_id": "E{{ item.rank }}"
+          }
+        }
+      ]
+    },
+    {
+      "id": "check_events",
+      "type": "router",
+      "routes": [
+        {
+          "when": {
+            "left": "{{ nodes.rank_events | length }}",
+            "op": "gt",
+            "right": 0
+          },
+          "goto": "validate_events"
+        }
+      ],
+      "default": "assemble_report"
+    },
+    {
+      "id": "validate_events",
+      "type": "for_each",
+      "description": "One trusted-domain search per top event.",
+      "items": "{{ nodes.rank_events }}",
+      "as": "event",
+      "max_items": "{{ inputs.max_validations }}",
+      "include_item": true,
+      "concurrency": 3,
+      "body": {
+        "type": "tool",
+        "server": "sajha",
+        "tool": "tavily_domain_search",
+        "select": "results",
+        "args": {
+          "query": "{{ event.validation_query }}",
+          "include_domains": "{{ inputs.trusted_domains }}",
+          "max_results": 5,
+          "include_answer": false
+        }
+      }
+    },
+    {
+      "id": "validation_digest",
+      "type": "transform",
+      "description": "Pair every ranked event with its validation results (null when not searched).",
+      "input": "{{ nodes.rank_events }}",
+      "steps": [
+        {
+          "op": "lookup",
+          "from": "{{ nodes.validate_events }}",
+          "field": "event_id",
+          "match": "item.event_id",
+          "as": "validation",
+          "single": true
+        },
+        {
+          "op": "map",
+          "fields": {
+            "event_id": "{{ item.event_id }}",
+            "headline": "{{ item.headline }}",
+            "summary": "{{ item.summary }}",
+            "validation_query": "{{ item.validation_query }}",
+            "validation_results": "{{ item.validation.result | default(null) }}",
+            "validation_error": "{{ item.validation.error | default(null) }}"
+          }
+        }
+      ]
+    },
+    {
+      "id": "assess_validation",
+      "type": "llm",
+      "description": "Judge whether trusted sources corroborate each event.",
+      "prompt_file": "prompts/assess_validation.md",
+      "max_tokens": 4000,
+      "output_schema": {
+        "type": "object",
+        "required": [
+          "assessments"
+        ],
+        "properties": {
+          "assessments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "event_id",
+                "validation_status",
+                "trusted_urls",
+                "note",
+                "adjusted_confidence"
+              ],
+              "properties": {
+                "event_id": {
+                  "type": "string"
+                },
+                "validation_status": {
+                  "type": "string",
+                  "enum": [
+                    "corroborated",
+                    "partially_corroborated",
+                    "not_found",
+                    "contradicted",
+                    "not_checked"
+                  ]
+                },
+                "trusted_urls": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "note": {
+                  "type": "string"
+                },
+                "adjusted_confidence": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "assemble_report",
+      "type": "transform",
+      "next": "END",
+      "description": "Final event list for analyst review.",
+      "input": "{{ nodes.rank_events }}",
+      "steps": [
+        {
+          "op": "lookup",
+          "from": "{{ nodes.assess_validation.assessments | default([]) }}",
+          "field": "event_id",
+          "match": "event_id",
+          "as": "validation",
+          "single": true
+        },
+        {
+          "op": "map",
+          "merge": true,
+          "fields": {
+            "review_status": "AI-generated"
+          }
+        }
+      ]
+    },
+    {
+      "id": "no_news",
+      "type": "transform",
+      "next": "END",
+      "input": "No news results were returned for the discovery queries."
+    }
+  ],
+  "output": {
+    "country": "{{ inputs.country }}",
+    "sector": "{{ inputs.sector }}",
+    "run_id": "{{ run.id }}",
+    "generated_at": "{{ run.started_at }}",
+    "articles_considered": "{{ nodes.collect_articles | length }}",
+    "excluded_article_refs": "{{ nodes.extract_events.excluded_refs | default([]) }}",
+    "events": "{{ nodes.assemble_report | default([]) }}",
+    "note": "{{ nodes.no_news | default(null) }}",
+    "review_status": "AI-generated: requires analyst review. No credit action is taken by this workflow."
+  }
+}

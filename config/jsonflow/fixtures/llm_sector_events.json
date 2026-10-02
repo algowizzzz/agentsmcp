@@ -1,0 +1,162 @@
+{
+  "_comment": "Scripted LLM answers for offline runs of sector_events.json. Synthetic.",
+  "extract_events": {
+    "events": [
+      {
+        "country": [
+          "USA"
+        ],
+        "sector": [
+          "Hedge Funds"
+        ],
+        "headline": "Treasury basis-trade deleveraging and repo funding stress",
+        "summary": "Leveraged funds unwound Treasury cash-futures basis trades as repo rates and futures margins rose. Prime brokers reported falling gross leverage in rates strategies.",
+        "subsectors_or_strategies": [
+          "Fixed Income Relative Value",
+          "Macro",
+          "Multi-Strategy"
+        ],
+        "event_type": "Liquidity/Funding",
+        "materiality": "high",
+        "materiality_rationale": "Funding and margin stress directly hits leveraged rates strategies.",
+        "direction": "negative",
+        "impact_channels": [
+          "leverage",
+          "repo funding",
+          "margin requirements",
+          "performance"
+        ],
+        "keywords": [
+          "Treasury",
+          "basis trade",
+          "repo",
+          "leverage",
+          "fixed income"
+        ],
+        "source_refs": [
+          1,
+          3,
+          4
+        ],
+        "validation_query": "hedge funds Treasury basis trade unwind repo rates",
+        "confidence": 0.9
+      },
+      {
+        "country": [
+          "USA"
+        ],
+        "sector": [
+          "Hedge Funds"
+        ],
+        "headline": "SEC Form PF amendments require 72-hour current reporting",
+        "summary": "The SEC adopted Form PF amendments requiring large hedge fund advisers to file current reports on certain stress events within 72 hours.",
+        "subsectors_or_strategies": [
+          "All strategies"
+        ],
+        "event_type": "Regulatory",
+        "materiality": "medium",
+        "materiality_rationale": "Adds reporting obligations and transparency on stress events; limited direct credit impact.",
+        "direction": "mixed",
+        "impact_channels": [
+          "regulatory compliance",
+          "operational"
+        ],
+        "keywords": [
+          "SEC",
+          "Form PF",
+          "reporting"
+        ],
+        "source_refs": [
+          2
+        ],
+        "validation_query": "SEC Form PF amendments hedge fund advisers current reporting",
+        "confidence": 0.85
+      },
+      {
+        "country": [
+          "USA"
+        ],
+        "sector": [
+          "Hedge Funds"
+        ],
+        "headline": "CFTC guidance on margin for cleared Treasury repo",
+        "summary": "CFTC staff clarified initial margin practices for cleared Treasury repo, which may change financing costs for leveraged funds.",
+        "subsectors_or_strategies": [
+          "Fixed Income Relative Value"
+        ],
+        "event_type": "Regulatory",
+        "materiality": "medium",
+        "materiality_rationale": "Could raise financing costs for repo-funded strategies.",
+        "direction": "negative",
+        "impact_channels": [
+          "repo funding",
+          "margin requirements"
+        ],
+        "keywords": [
+          "CFTC",
+          "repo",
+          "margin",
+          "clearing"
+        ],
+        "source_refs": [
+          5
+        ],
+        "validation_query": "CFTC guidance cleared Treasury repo margin",
+        "confidence": 0.7
+      },
+      {
+        "country": [
+          "USA"
+        ],
+        "sector": [
+          "Hedge Funds"
+        ],
+        "headline": "Hedge fund manager hires new marketing chief",
+        "summary": "A manager appointed a new chief marketing officer.",
+        "subsectors_or_strategies": [],
+        "event_type": "Business/Corporate",
+        "materiality": "low",
+        "materiality_rationale": "Personnel news with no credit channel.",
+        "direction": "neutral",
+        "impact_channels": [],
+        "keywords": [],
+        "source_refs": [
+          6
+        ],
+        "validation_query": "hedge fund chief marketing officer appointment",
+        "confidence": 0.95
+      }
+    ],
+    "excluded_refs": []
+  },
+  "assess_validation": {
+    "assessments": [
+      {
+        "event_id": "E1",
+        "validation_status": "corroborated",
+        "trusted_urls": [
+          "https://www.reuters.com/markets/us/synthetic-fixture-basis-confirm/",
+          "https://www.federalreserve.gov/synthetic-fixture/fsr-note"
+        ],
+        "note": "Reuters and a Federal Reserve note report the same deleveraging.",
+        "adjusted_confidence": 0.93
+      },
+      {
+        "event_id": "E2",
+        "validation_status": "corroborated",
+        "trusted_urls": [
+          "https://www.sec.gov/rules/synthetic-fixture-form-pf-final"
+        ],
+        "note": "SEC final rule confirms the amendments.",
+        "adjusted_confidence": 0.95
+      },
+      {
+        "event_id": "E3",
+        "validation_status": "not_found",
+        "trusted_urls": [],
+        "note": "Trusted-domain search returned no results; not a contradiction.",
+        "adjusted_confidence": 0.6
+      }
+    ]
+  }
+}

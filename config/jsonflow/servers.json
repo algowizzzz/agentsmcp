@@ -1,0 +1,55 @@
+{
+  "servers": {
+    "sajha": {
+      "transport": "sajha_rest",
+      "base_url": "${SAJHA_BASE_URL:-http://localhost:3002}",
+      "auth": {"mode": "apikey", "api_key_env": "SAJHA_API_KEY"},
+      "timeout": 45,
+      "allow_tools": ["*"],
+      "deny_tools": [
+        "*_send_*", "*_reply_*", "*_create_*", "*_update_*", "*_upload_*", "*_add_comment",
+        "*_refresh_*", "python_*", "md_save", "data_export", "fill_template", "md_to_docx"
+      ],
+      "raw_category_map": {
+        "News Search": "web",
+        "Web Search": "web",
+        "Targeted Search": "web",
+        "Research": "web",
+        "Browser": "web",
+        "Financial Analysis": "web",
+        "Data Analytics": "structured",
+        "Data Query": "structured",
+        "OLAP Analytics": "structured",
+        "Risk Data": "structured",
+        "Data Processing": "structured",
+        "analytics": "structured",
+        "Document Processing": "unstructured",
+        "Document Intelligence": "unstructured",
+        "Search": "unstructured",
+        "File Management": "unstructured",
+        "collaboration": "unstructured",
+        "communication": "unstructured"
+      }
+    },
+    "generic_mcp_example": {
+      "transport": "mcp_http",
+      "url": "${EXAMPLE_MCP_URL:-http://localhost:9000/mcp}",
+      "headers": {"Authorization": "Bearer ${EXAMPLE_MCP_TOKEN:-}"},
+      "allow_tools": ["*"],
+      "default_category": "other"
+    }
+  },
+  "categories": {
+    "web": ["tavily_*", "browser_*", "ir_*", "*_web_*", "*_news_*"],
+    "structured": [
+      "duckdb_*", "sqlselect_*", "*olap*", "iris_*", "get_counterparty_exposure", "get_credit_limits",
+      "get_historical_exposure", "get_trade_inventory", "get_var_contribution", "parquet_read", "data_transform",
+      "powerbi_*", "yahoo_*", "edgar_get_metric", "edgar_get_statements", "edgar_calculate_ratios",
+      "edgar_peer_comparison"
+    ],
+    "unstructured": [
+      "file_read", "pdf_read", "msdoc_*", "document_search", "search_files", "list_uploaded_files", "list_versions",
+      "confluence_*", "sharepoint_*", "teams_*", "outlook_*", "edgar_*", "workflow_get"
+    ]
+  }
+}

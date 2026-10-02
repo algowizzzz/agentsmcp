@@ -1,0 +1,8 @@
+# Dependencies for the jsonflow engine. Kept separate from the root
+# requirements.txt, which pins langgraph 0.0.20 for the older planner code.
+langgraph>=1.0
+pydantic>=2.6
+httpx>=0.27
+jsonschema>=4.19
+anthropic>=0.40
+pytest>=8.0

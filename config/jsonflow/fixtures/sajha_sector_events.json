@@ -1,0 +1,411 @@
+{
+  "_comment": "Synthetic responses for offline runs of sector_events.json. Not real news.",
+  "tools": [
+    {
+      "name": "tavily_news_search",
+      "description": "Search for recent news articles from the last 7 days with recency prioritization. Use for: breaking news, earnings announcements, credit rating actions, market events, regulatory updates. Prefer over web_search for any time-sensitive query.",
+      "category": "News Search",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "News search query"
+          },
+          "max_results": {
+            "type": "integer",
+            "description": "Maximum number of news articles to return",
+            "default": 5,
+            "minimum": 1,
+            "maximum": 20
+          },
+          "include_answer": {
+            "type": "boolean",
+            "description": "Include AI-generated news summary",
+            "default": true
+          },
+          "_worker_context": {
+            "type": "object",
+            "description": "Injected by agent"
+          }
+        },
+        "required": [
+          "query"
+        ]
+      }
+    },
+    {
+      "name": "tavily_domain_search",
+      "description": "Search within specific trusted domains for authoritative financial intelligence. Use for: credit ratings (moodys.com, spglobal.com, fitchratings.com), regulators (sec.gov, federalreserve.gov, bis.org), financial news (bloomberg.com, reuters.com, ft.com, wsj.com), filings (edgar.sec.gov). Always prefer this over general search when a specific authoritative source is appropriate.",
+      "category": "Targeted Search",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Search query"
+          },
+          "include_domains": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of domains to search within. For financial intelligence use: bloomberg.com, reuters.com, ft.com, wsj.com, sec.gov, moodys.com, spglobal.com, fitchratings.com, federalreserve.gov, bis.org"
+          },
+          "exclude_domains": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of domains to exclude from search (e.g., ['pinterest.com', 'facebook.com'])"
+          },
+          "max_results": {
+            "type": "integer",
+            "description": "Maximum number of results",
+            "default": 5,
+            "minimum": 1,
+            "maximum": 20
+          },
+          "include_answer": {
+            "type": "boolean",
+            "description": "Include AI-generated answer",
+            "default": true
+          },
+          "_worker_context": {
+            "type": "object",
+            "description": "Injected by agent"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "oneOf": [
+          {
+            "required": [
+              "include_domains"
+            ]
+          },
+          {
+            "required": [
+              "exclude_domains"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "tavily_web_search",
+      "description": "Broad web search for general queries when no specific domain is known. Use as a last resort \u2014 prefer tavily_news_search for recent events, tavily_domain_search for financial/regulatory sources, tavily_research_search for deep analysis.",
+      "category": "Web Search",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Search query to find web information"
+          },
+          "search_depth": {
+            "type": "string",
+            "description": "Depth of search - 'basic' for quick results, 'advanced' for comprehensive search",
+            "enum": [
+              "basic",
+              "advanced"
+            ],
+            "default": "basic"
+          },
+          "max_results": {
+            "type": "integer",
+            "description": "Maximum number of results to return",
+            "default": 5,
+            "minimum": 1,
+            "maximum": 20
+          },
+          "include_answer": {
+            "type": "boolean",
+            "description": "Include AI-generated answer summary",
+            "default": true
+          },
+          "include_images": {
+            "type": "boolean",
+            "description": "Include relevant images in results",
+            "default": false
+          },
+          "_worker_context": {
+            "type": "object",
+            "description": "Injected by agent"
+          }
+        },
+        "required": [
+          "query"
+        ]
+      }
+    },
+    {
+      "name": "tavily_research_search",
+      "description": "Deep research search for comprehensive financial analysis, regulatory filings, academic/professional content requiring broad coverage. Use for: annual reports, industry studies, macro analysis, technical deep-dives. Prefer over web_search when depth matters.",
+      "category": "Research",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Research query for comprehensive search"
+          },
+          "topic": {
+            "type": "string",
+            "description": "Research topic category for optimized results",
+            "enum": [
+              "general",
+              "science",
+              "finance"
+            ],
+            "default": "general"
+          },
+          "max_results": {
+            "type": "integer",
+            "description": "Maximum number of results (higher for research)",
+            "default": 7,
+            "minimum": 5,
+            "maximum": 20
+          },
+          "include_raw_content": {
+            "type": "boolean",
+            "description": "Include full HTML content for deeper analysis",
+            "default": false
+          },
+          "_worker_context": {
+            "type": "object",
+            "description": "Injected by agent"
+          }
+        },
+        "required": [
+          "query"
+        ]
+      }
+    },
+    {
+      "name": "duckdb_query",
+      "description": "Run a read-only SQL query over DuckDB views.",
+      "category": "Data Analytics",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "sql": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "sql"
+        ]
+      }
+    },
+    {
+      "name": "iris_limit_lookup",
+      "description": "Look up approved credit limits for a counterparty.",
+      "category": "Risk Data",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "counterparty": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "counterparty"
+        ]
+      }
+    },
+    {
+      "name": "pdf_read",
+      "description": "Extract text from a PDF file.",
+      "category": "Document Processing",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "path"
+        ]
+      }
+    },
+    {
+      "name": "outlook_send_email",
+      "description": "Send an email.",
+      "category": "communication",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "to": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "to"
+        ]
+      }
+    },
+    {
+      "name": "generate_chart",
+      "description": "Render a chart.",
+      "category": "Visualisation",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  ],
+  "responses": {
+    "tavily_news_search": [
+      {
+        "match": {
+          "query": "major developments"
+        },
+        "result": {
+          "query": "q1",
+          "results_count": 3,
+          "results": [
+            {
+              "title": "[SYNTHETIC TEST DATA] Treasury basis trade unwind pushes repo rates higher",
+              "url": "https://www.reuters.com/markets/us/synthetic-fixture-basis-trade-unwind/",
+              "content": "Leveraged funds running Treasury cash-futures basis trades cut positions as repo rates rose and futures margins increased.",
+              "score": 0.92,
+              "published_date": "2026-09-30"
+            },
+            {
+              "title": "[SYNTHETIC TEST DATA] Hedge funds cut leverage as Treasury volatility spikes",
+              "url": "https://news.example.com/synthetic-fixture/hedge-funds-cut-leverage",
+              "content": "Prime brokers report hedge fund gross leverage in rates strategies fell sharply over the week amid Treasury volatility.",
+              "score": 0.88,
+              "published_date": "2026-09-30"
+            },
+            {
+              "title": "[SYNTHETIC TEST DATA] Fund manager appoints new chief marketing officer",
+              "url": "https://pr.example.net/synthetic-fixture/cmo-appointment",
+              "content": "A hedge fund manager announced the appointment of a new chief marketing officer.",
+              "score": 0.5,
+              "published_date": "2026-09-30"
+            }
+          ]
+        }
+      },
+      {
+        "match": {
+          "query": "market risks"
+        },
+        "result": {
+          "query": "q2",
+          "results_count": 3,
+          "results": [
+            {
+              "title": "[SYNTHETIC TEST DATA] Basis trade unwind lifts repo rates (syndicated)",
+              "url": "https://reuters.com/markets/us/synthetic-fixture-basis-trade-unwind?utm_source=feed",
+              "content": "Leveraged funds running Treasury cash-futures basis trades cut positions as repo rates rose and futures margins increased.",
+              "score": 0.8,
+              "published_date": "2026-09-30"
+            },
+            {
+              "title": "[SYNTHETIC TEST DATA] Repo market volatility pressures leveraged relative-value funds",
+              "url": "https://markets.example.org/synthetic-fixture/repo-volatility",
+              "content": "Overnight repo rates spiked, raising funding costs for fixed-income relative-value strategies that depend on repo financing.",
+              "score": 0.85,
+              "published_date": "2026-09-30"
+            },
+            {
+              "title": "[SYNTHETIC TEST DATA] CFTC staff issues guidance on margin for cleared Treasury repo",
+              "url": "https://news.example.com/synthetic-fixture/cftc-repo-margin",
+              "content": "CFTC staff guidance clarifies initial margin practices for cleared Treasury repo, affecting leveraged fund financing costs.",
+              "score": 0.7,
+              "published_date": "2026-09-28"
+            }
+          ]
+        }
+      },
+      {
+        "match": {
+          "query": "regulation"
+        },
+        "result": {
+          "query": "q3",
+          "results_count": 2,
+          "results": [
+            {
+              "title": "[SYNTHETIC TEST DATA] SEC adopts amendments to Form PF reporting for large hedge fund advisers",
+              "url": "https://www.sec.gov/newsroom/synthetic-fixture-form-pf",
+              "content": "The SEC adopted amendments requiring large hedge fund advisers to file current reports on certain stress events within 72 hours.",
+              "score": 0.9,
+              "published_date": "2026-09-29"
+            },
+            {
+              "title": "[SYNTHETIC TEST DATA] SEC adopts amendments to Form PF reporting for large hedge fund advisers",
+              "url": "https://mirror.example.com/synthetic-fixture/form-pf-copy",
+              "content": "The SEC adopted amendments requiring large hedge fund advisers to file current reports on certain stress events within 72 hours.",
+              "score": 0.6,
+              "published_date": "2026-09-29"
+            }
+          ]
+        }
+      },
+      {
+        "match": {
+          "query": "fixed income"
+        },
+        "error": "Tavily API rate limit (synthetic failure to exercise on_item_error)"
+      }
+    ],
+    "tavily_domain_search": [
+      {
+        "match": {
+          "query": "basis"
+        },
+        "result": {
+          "query": "basis",
+          "results_count": 2,
+          "results": [
+            {
+              "title": "[SYNTHETIC TEST DATA] Funds unwind Treasury basis trades as repo costs climb",
+              "url": "https://www.reuters.com/markets/us/synthetic-fixture-basis-confirm/",
+              "content": "Reuters reports leveraged funds reduced basis-trade positions this week.",
+              "score": 0.9
+            },
+            {
+              "title": "[SYNTHETIC TEST DATA] Federal Reserve notes elevated hedge fund leverage in Treasury markets",
+              "url": "https://www.federalreserve.gov/synthetic-fixture/fsr-note",
+              "content": "Financial stability note on hedge fund Treasury leverage.",
+              "score": 0.8
+            }
+          ]
+        }
+      },
+      {
+        "match": {
+          "query": "Form PF"
+        },
+        "result": {
+          "query": "Form PF",
+          "results_count": 1,
+          "results": [
+            {
+              "title": "[SYNTHETIC TEST DATA] SEC Form PF amendments final rule",
+              "url": "https://www.sec.gov/rules/synthetic-fixture-form-pf-final",
+              "content": "Final rule text for Form PF amendments.",
+              "score": 0.95
+            }
+          ]
+        }
+      },
+      {
+        "match": {
+          "query": "repo"
+        },
+        "result": {
+          "query": "repo",
+          "results_count": 0,
+          "results": []
+        }
+      }
+    ]
+  }
+}
