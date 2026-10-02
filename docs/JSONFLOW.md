@@ -16,8 +16,9 @@ python -m jsonflow run config/jsonflow/workflows/sector_events.json \
   --mock-mcp sajha=config/jsonflow/fixtures/sajha_sector_events.json \
   --mock-llm config/jsonflow/fixtures/llm_sector_events.json
 
-# Live: real SAJHA server and Anthropic API
-export SAJHA_BASE_URL=http://localhost:3002 SAJHA_API_KEY=... ANTHROPIC_API_KEY=...
+# Live: real SAJHA server plus any LLM (see "LLM providers")
+export SAJHA_BASE_URL=http://localhost:3002 SAJHA_API_KEY=...
+export ANTHROPIC_API_KEY=...            # or the OPENAI_COMPAT_* variables below
 python -m jsonflow run config/jsonflow/workflows/sector_events.json -i country=USA -i sector="Hedge Funds"
 
 python -m jsonflow tools                      # node palette from live MCP discovery, grouped by category
@@ -41,7 +42,7 @@ Every run writes `runs/<run_id>/`: the exact workflow and its hash, inputs, copi
 | `jsonflow/validate.py` | Static checks before a run |
 | `jsonflow/runner.py` | `run_workflow()` |
 | `jsonflow/mcp/` | SAJHA REST client, standard MCP Streamable HTTP client, fixture client, server registry |
-| `jsonflow/llm/` | Anthropic provider, scripted provider, adapter to the repo's `LLMFacade` |
+| `jsonflow/llm/` | Anthropic provider, OpenAI-compatible provider, scripted provider, adapter to the repo's `LLMFacade` |
 | `config/jsonflow/servers.json` | MCP server registry, allowlists, category rules |
 | `config/jsonflow/workflows/` | Workflows and their prompt files |
 | `config/jsonflow/fixtures/` | Synthetic SAJHA and LLM responses for offline runs |
@@ -53,7 +54,7 @@ Every run writes `runs/<run_id>/`: the exact workflow and its hash, inputs, copi
   "id": "sector_events", "version": "1.0.0",
   "inputs":  {"country": {"type": "string", "default": "USA"}},
   "budgets": {"max_tool_calls": 10, "max_llm_calls": 4, "max_steps": 30},
-  "defaults": {"provider": "anthropic", "model": "claude-opus-5-5"},
+  "defaults": {"provider": "openai_compat", "model": "my-model"},
   "nodes": [ ... ],
   "edges": [["a", "b"]],
   "output": {"events": "{{ nodes.assemble_report | default([]) }}"}
@@ -94,6 +95,33 @@ Ops: `eq ne gt gte lt lte in not_in contains empty not_empty truthy falsy length
 ### Transform ops
 
 `flatten`, `map`, `pick`, `filter`, `dedupe` (with `normalize: url | text`), `sort` (multi-key, with a `rank` map for enums), `limit`, `enumerate`, `lookup` (join against another list), `render`.
+
+## LLM providers
+
+The provider and model for an llm node come from, in order: the node's `provider` and `model`, the workflow's `defaults`, then the environment. The sector workflow sets neither, so the environment decides and the same JSON runs on any model.
+
+```bash
+export JSONFLOW_LLM_PROVIDER=openai_compat   # anthropic (default) | openai_compat | facade
+export JSONFLOW_LLM_MODEL=gpt-4.1            # required for anything but anthropic
+```
+
+| Provider | Endpoint | Structured output |
+|---|---|---|
+| `anthropic` | Anthropic Messages API via the SDK. Default model `claude-opus-5-5`. Needs `ANTHROPIC_API_KEY`. | Forced tool call |
+| `openai_compat` | Any OpenAI-compatible `/chat/completions`: OpenAI, Azure OpenAI, vLLM, Ollama, LiteLLM, LM Studio, HuggingFace router, xAI. Plain HTTP, no SDK. | `tools` forced function call (default), `json_schema` response format, or `json` mode with the schema in the prompt |
+| `facade` | This repo's `llm.llm_facade.LLMFacade` and `config/llm/llm.json`. Model as `provider/model`. | Facade's own |
+| `scripted` | Canned answers for tests and offline demos. | n/a |
+
+OpenAI-compatible settings:
+
+```bash
+export OPENAI_COMPAT_BASE_URL=http://localhost:8000/v1     # server root that serves /chat/completions
+export OPENAI_COMPAT_API_KEY=...                           # sent as Bearer; optional for local servers
+export OPENAI_COMPAT_STRUCTURED=tools                      # use json for servers without function calling
+export OPENAI_COMPAT_HEADERS='{"api-key": "..."}'          # optional, e.g. Azure
+```
+
+Whatever the provider, every answer to a node with `output_schema` is validated by the engine and gets one corrected retry.
 
 ## MCP servers and tool categories
 
@@ -142,10 +170,10 @@ Default budget: 10 tool calls and 4 LLM calls. A normal run uses 7 and 2.
 
 ## Verification so far
 
-- **Unit and end-to-end tests:** 78 tests, all passing, with synthetic fixtures and mocked HTTP transports.
+- **Unit and end-to-end tests:** 87 tests, all passing, with synthetic fixtures and mocked HTTP transports. One runs the whole sector workflow with both LLM nodes going through the OpenAI-compatible HTTP path.
 - **Live SAJHA:** the archived v2.9.8 server from mcp-intelligence-agent was run locally. Discovery, categorization, palette export and validation worked against its real catalog. Its real responses exposed one bug, a tool failure nested inside a success envelope, which is now fixed and covered by a test.
 - **Live Tavily through SAJHA:** all 7 tool calls succeeded in about 8 seconds. 20 real articles were deduplicated to 15, and the trusted-domain searches returned sec.gov, cftc.gov and reuters.com results.
-- **Not yet verified live:** the two LLM nodes. No model credentials were available, so those ran on scripted answers.
+- **Not yet verified live:** the two LLM nodes, on any provider. No model credentials were available, so those ran on scripted or mocked answers.
 
 ## Known limits
 

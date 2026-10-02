@@ -49,10 +49,6 @@
     "max_llm_calls": 4,
     "max_steps": 30
   },
-  "defaults": {
-    "provider": "anthropic",
-    "model": "claude-opus-5-5"
-  },
   "nodes": [
     {
       "id": "build_queries",

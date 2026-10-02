@@ -143,7 +143,7 @@ def _dispatch(args: argparse.Namespace) -> int:
         providers = None
         if args.mock_llm:
             scripted = ScriptedProvider(args.mock_llm)
-            providers = {"anthropic": scripted, "facade": scripted, "scripted": scripted}
+            providers = {"anthropic": scripted, "openai_compat": scripted, "facade": scripted, "scripted": scripted}
         result = run_workflow(wf, _parse_inputs(args.input, args.inputs_json), registry=registry,
                               llm_providers=providers, run_dir=args.run_dir, run_id=args.run_id)
         if not args.quiet:

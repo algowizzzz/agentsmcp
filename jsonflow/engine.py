@@ -25,7 +25,7 @@ from langgraph.graph import START, StateGraph
 
 from jsonflow.errors import BudgetExceeded, ExpressionError, JsonFlowError, LLMError, ToolError
 from jsonflow.expressions import MISSING, evaluate_condition, get_path, render
-from jsonflow.llm.base import DEFAULT_MODEL, DEFAULT_PROVIDER, LLMProvider, LLMRequest, build_provider
+from jsonflow.llm.base import LLMProvider, LLMRequest, build_provider, default_model, default_provider
 from jsonflow.mcp.registry import ServerRegistry
 from jsonflow.spec import END, ForEachNode, LLMNode, RouterNode, ToolNode, TransformNode, Workflow
 from jsonflow.transforms import apply_steps
@@ -188,8 +188,8 @@ def run_llm(node: LLMNode, ctx: RunContext, scope: dict[str, Any], label: str) -
     prompt_t = node.prompt or _read_text(ctx, node.prompt_file)
     system = _as_prompt(render(system_t, scope)) if system_t else None
     prompt = _as_prompt(render(prompt_t, scope))
-    provider_name = node.provider or ctx.workflow.defaults.get("provider") or DEFAULT_PROVIDER
-    model = node.model or ctx.workflow.defaults.get("model") or DEFAULT_MODEL
+    provider_name = node.provider or ctx.workflow.defaults.get("provider") or default_provider()
+    model = node.model or ctx.workflow.defaults.get("model") or default_model(provider_name)
     provider = ctx.provider(provider_name)
     schema = node.output_schema
     validator = jsonschema.validators.validator_for(schema)(schema) if schema else None

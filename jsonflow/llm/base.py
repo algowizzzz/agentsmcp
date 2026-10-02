@@ -8,8 +8,22 @@ from typing import Any, Optional, Protocol
 
 from jsonflow.errors import LLMError
 
-DEFAULT_PROVIDER = os.getenv("JSONFLOW_LLM_PROVIDER", "anthropic")
-DEFAULT_MODEL = os.getenv("JSONFLOW_LLM_MODEL", "claude-opus-5-5")
+ANTHROPIC_DEFAULT_MODEL = "claude-opus-5-5"
+
+
+def default_provider() -> str:
+    """Provider when neither the node nor the workflow names one."""
+    return os.getenv("JSONFLOW_LLM_PROVIDER", "anthropic")
+
+
+def default_model(provider: str) -> str:
+    """Model when neither the node nor the workflow names one."""
+    model = os.getenv("JSONFLOW_LLM_MODEL")
+    if model:
+        return model
+    if provider == "anthropic":
+        return ANTHROPIC_DEFAULT_MODEL
+    raise LLMError(f"set JSONFLOW_LLM_MODEL (or 'model' on the node) for provider {provider!r}")
 
 
 @dataclass
@@ -43,6 +57,10 @@ def build_provider(name: str, **kw: Any) -> LLMProvider:
         from jsonflow.llm.anthropic_provider import AnthropicProvider
 
         return AnthropicProvider(**kw)
+    if name == "openai_compat":
+        from jsonflow.llm.openai_compat import OpenAICompatProvider
+
+        return OpenAICompatProvider(**kw)
     if name == "scripted":
         from jsonflow.llm.scripted import ScriptedProvider
 
@@ -51,4 +69,4 @@ def build_provider(name: str, **kw: Any) -> LLMProvider:
         from jsonflow.llm.facade_provider import FacadeProvider
 
         return FacadeProvider(**kw)
-    raise LLMError(f"unknown LLM provider {name!r}; available: anthropic, scripted, facade")
+    raise LLMError(f"unknown LLM provider {name!r}; available: anthropic, openai_compat, scripted, facade")
