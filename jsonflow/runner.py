@@ -65,6 +65,7 @@ def run_workflow(
     llm_providers: Optional[dict[str, LLMProvider]] = None,
     run_dir: Optional[str | Path] = "runs",
     run_id: Optional[str] = None,
+    llm_defaults: Optional[dict[str, Any]] = None,
 ) -> RunResult:
     wf = workflow if isinstance(workflow, Workflow) else load_workflow(workflow)
     if registry is None:
@@ -75,7 +76,8 @@ def run_workflow(
     if not report.ok:
         raise SpecError("workflow failed validation:\n- " + "\n- ".join(report.errors))
 
-    ctx = RunContext(wf, registry, llm_providers=llm_providers, run_dir=Path(run_dir) if run_dir else None, run_id=run_id)
+    ctx = RunContext(wf, registry, llm_providers=llm_providers, run_dir=Path(run_dir) if run_dir else None,
+                     run_id=run_id, llm_defaults=llm_defaults)
     if ctx.run_dir:
         ctx.save("workflow.json", {"source_hash": wf.source_hash, **wf.model_dump(mode="json", by_alias=True, exclude_none=True)})
         ctx.save("inputs.json", resolved)

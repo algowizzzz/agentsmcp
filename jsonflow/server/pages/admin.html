@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin · jsonflow</title>
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/static/app.css">
+<script src="/static/common.js" defer></script>
+<script src="/static/admin.js" defer></script>
+</head>
+<body>
+<header id="topbar" class="topbar"></header>
+<main class="page">
+  <div class="page-head"><h1>Admin</h1><span class="chip">Super admins only</span></div>
+  <div class="tabs" role="tablist" aria-label="Admin sections">
+    <button role="tab" type="button" data-tab="users" aria-selected="true">Users</button>
+    <button role="tab" type="button" data-tab="categories" aria-selected="false">Categories</button>
+    <button role="tab" type="button" data-tab="servers" aria-selected="false">MCP servers</button>
+    <button role="tab" type="button" data-tab="llm" aria-selected="false">Model</button>
+    <button role="tab" type="button" data-tab="keys" aria-selected="false">API keys</button>
+    <button role="tab" type="button" data-tab="audit" aria-selected="false">Audit log</button>
+  </div>
+  <section id="panel" role="tabpanel"></section>
+</main>
+</body>
+</html>

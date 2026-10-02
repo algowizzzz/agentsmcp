@@ -47,6 +47,7 @@ def test_palette_groups_and_hides_internal_args(servers_config, sajha_fixture):
 
 
 def test_palette_reports_unreachable_server(servers_config, sajha_fixture):
+    servers_config["servers"]["generic_mcp_example"] = {"transport": "mcp_http", "url": "http://127.0.0.1:9/mcp"}
     reg = _registry(servers_config, sajha_fixture)
     palette = reg.palette(["sajha", "generic_mcp_example"])
     assert "generic_mcp_example" in palette["errors"]

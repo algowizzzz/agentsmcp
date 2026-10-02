@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guide · jsonflow</title>
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/static/app.css">
+<script src="/static/common.js" defer></script>
+<script src="/static/public.js" defer></script>
+</head>
+<body data-page="guide">
+<header id="topbar" class="topbar"></header>
+<div class="doc">
+<nav class="toc" aria-label="Guide contents">
+  <a href="#start">Overview</a>
+  <a href="#roles">1. Roles and signing in</a>
+  <a href="#dashboard">2. The agents page</a>
+  <a href="#create">3. Create an agent</a>
+  <a href="#canvas">4. Add and connect steps</a>
+  <a href="#values">5. Set values three ways</a>
+  <a href="#tools">6. Tool steps</a>
+  <a href="#llm">7. LLM steps</a>
+  <a href="#transform">8. Transform steps</a>
+  <a href="#router">9. Routers</a>
+  <a href="#parallel">10. Repeat and run in parallel</a>
+  <a href="#settings">11. Inputs, output and budgets</a>
+  <a href="#save">12. Validate, save and versions</a>
+  <a href="#run">13. Run and read the results</a>
+  <a href="#publish">14. Publish as an MCP tool</a>
+  <a href="#compose">15. Agents that call agents</a>
+  <a href="#super">16. Super admin tasks</a>
+  <a href="#trouble">17. Troubleshooting</a>
+</nav>
+<article>
+<h1 id="start">How to use jsonflow</h1>
+<p>An <b>agent</b> is a flow of steps on a canvas. Steps are tools from your MCP servers, LLM calls, transforms and routers. You connect them, set their values, run the agent, and publish it so other systems can call it as an MCP tool. This guide builds up from an empty agent to a published one.</p>
+<div class="callout">Want to see a finished agent first? Open <b>Sector event discovery</b> in the Credit Risk category. It searches news, groups articles into events, ranks them and checks them against trusted sources.</div>
+
+<h2 id="roles">1. Roles and signing in</h2>
+<p>There are two roles. A super admin creates every account; there is no self sign-up.</p>
+<table class="tbl">
+<thead><tr><th>Task</th><th>Admin</th><th>Super admin</th></tr></thead>
+<tbody>
+<tr><td>Build, edit, validate and run agents</td><td>Yes</td><td>Yes</td></tr>
+<tr><td>Publish and unpublish agents</td><td>Yes</td><td>Yes</td></tr>
+<tr><td>See every run and its audit files</td><td>Yes</td><td>Yes</td></tr>
+<tr><td>Delete agents</td><td>No</td><td>Yes</td></tr>
+<tr><td>Manage users, categories, MCP servers and the model</td><td>No</td><td>Yes</td></tr>
+<tr><td>Issue and revoke MCP API keys, read the audit log</td><td>No</td><td>Yes</td></tr>
+</tbody></table>
+<p>Sign in with your username and password. Five wrong attempts lock the account for five minutes. Change your password from the <b>Password</b> button in the top bar; you will be signed out everywhere.</p>
+
+<h2 id="dashboard">2. The agents page</h2>
+<p>After signing in you land on <b>Agents</b>. Agents are grouped by category. Each card shows whether it is published, its version, and how its last run went. The right column lists recent runs from every trigger: the app, MCP clients and other agents. It also shows the MCP addresses for your agents.</p>
+
+<h2 id="create">3. Create an agent</h2>
+<ol>
+<li>Select <b>New agent</b>.</li>
+<li>Give it a name. The name becomes its id, for example <code>Limit Watch</code> becomes <code>limit_watch</code>. The id is also its MCP tool name and never changes.</li>
+<li>Pick a category. Categories group agents in the app and on MCP. Only a super admin can add categories.</li>
+<li>Start blank, copy an existing agent, or paste agent JSON exported from another installation.</li>
+</ol>
+<p>The builder opens with a single <code>start</code> step. Keep it, replace it, or delete it once you have added others.</p>
+
+<h2 id="canvas">4. Add and connect steps</h2>
+<p>The builder has three areas: the <b>palette</b> on the left, the <b>canvas</b> in the middle and the <b>inspector</b> on the right.</p>
+<ul>
+<li><b>Add a step:</b> drag an item from the palette onto the canvas, or click it to drop it near the middle. The palette search filters by name and description.</li>
+<li><b>Move a step:</b> drag its card.</li>
+<li><b>Connect:</b> drag from the small circle on a card's right edge onto another card. A step with no outgoing connection ends the agent.</li>
+<li><b>Parallel branches:</b> connect one step to several. They run at the same time.</li>
+<li><b>Select:</b> click a card or a connection. Press Delete, or use the inspector's delete button, to remove it.</li>
+<li><b>Start:</b> the step marked <span class="chip">start</span> runs first. Change it from the step's inspector.</li>
+<li><b>Pan and zoom:</b> scroll, drag the empty canvas, or use the zoom buttons. <b>Fit</b> brings every step into view; <b>Tidy</b> lays the flow out left to right.</li>
+</ul>
+
+<h2 id="values">5. Set values three ways</h2>
+<p>Every value a step needs offers three modes. Pick per field.</p>
+<table class="tbl">
+<thead><tr><th>Mode</th><th>Use it for</th><th>Example</th></tr></thead>
+<tbody>
+<tr><td>Fixed value</td><td>A constant</td><td><code>5</code>, <code>reuters.com, sec.gov</code></td></tr>
+<tr><td>Pick from data</td><td>An agent input or another step's output, from a list</td><td><code>inputs.country</code>, <code>nodes.collect_articles</code></td></tr>
+<tr><td>Expression</td><td>Anything more: a field deep inside a result, text with values mixed in, or a filter</td><td><code>{{ event.validation_query | truncate(300) }}</code></td></tr>
+</tbody></table>
+<h3>Expressions</h3>
+<p>An expression sits inside <code>{{ }}</code>. A field that is exactly one expression keeps the value's type, so a list stays a list. Text with expressions mixed in becomes text.</p>
+<ul>
+<li><code>inputs.&lt;name&gt;</code> is an agent input. <code>nodes.&lt;step id&gt;</code> is a step's output. <code>run.date</code> and <code>run.id</code> describe the run.</li>
+<li>Reach inside with dots and indexes: <code>nodes.search.results[0].title</code>.</li>
+<li>Inside a repeated step, <code>item</code> (or the name you chose) is the current item and <code>index</code> its position.</li>
+</ul>
+<table class="tbl">
+<thead><tr><th>Filter</th><th>Does</th></tr></thead>
+<tbody>
+<tr><td><code>default(x)</code></td><td>Use x when the value is missing. Add it to anything that might not exist, such as output of a branch that did not run.</td></tr>
+<tr><td><code>length</code></td><td>Count items or characters</td></tr>
+<tr><td><code>join(', ')</code></td><td>Join a list into text</td></tr>
+<tr><td><code>pluck('url')</code></td><td>Take one field from every item of a list</td></tr>
+<tr><td><code>first</code>, <code>last</code></td><td>First or last item</td></tr>
+<tr><td><code>truncate(200)</code></td><td>Shorten text</td></tr>
+<tr><td><code>upper</code>, <code>lower</code></td><td>Change case</td></tr>
+<tr><td><code>domain</code></td><td>Host name of a URL, without www</td></tr>
+<tr><td><code>json</code>, <code>pretty</code></td><td>Turn a value into JSON text, compact or indented, for prompts</td></tr>
+</tbody></table>
+
+<h2 id="tools">6. Tool steps</h2>
+<p>Tool steps call a tool on a connected MCP server. The palette groups tools as <b>web</b>, <b>structured</b> data, <b>unstructured</b> documents, <b>agents</b> and <b>other</b>.</p>
+<ul>
+<li>The inspector lists the tool's arguments from its schema. Required ones are marked.</li>
+<li>Values are checked against the schema before the call, so a wrong type fails fast with a clear message instead of a confusing server error.</li>
+<li><b>Keep from result</b> takes one field of the result, for example <code>results</code>, so later steps get just the list.</li>
+<li><b>Retries</b> repeats a failed call up to three times. <b>Timeout</b> caps a slow call.</li>
+</ul>
+
+<h2 id="llm">7. LLM steps</h2>
+<ul>
+<li>Write the prompt in the inspector. Use the insert buttons under the prompt to add inputs and earlier outputs; they insert expressions such as <code>{{ nodes.collect_articles | pretty }}</code>.</li>
+<li>Add an optional system prompt for standing rules, such as "work only from the supplied articles".</li>
+<li><b>Structured output</b> takes a JSON Schema whose top level is an object. The answer is checked against it. If it does not match, the model gets one automatic correction; if it still fails, the step fails. Later steps can then rely on fields like <code>nodes.extract_events.events</code>.</li>
+<li>Leave provider and model blank to use the model a super admin configured. Set them only when a step needs a different one.</li>
+</ul>
+<div class="callout">Ask for references, not URLs. In the example agent the model cites articles by number and a transform attaches the real URLs. That stops invented links.</div>
+
+<h2 id="transform">8. Transform steps</h2>
+<p>A transform takes one input value and applies steps in order. No model and no tool are involved, so transforms are free and predictable.</p>
+<table class="tbl">
+<thead><tr><th>Step</th><th>Does</th></tr></thead>
+<tbody>
+<tr><td>flatten</td><td>Turn a list of lists into one list, optionally taking a list field from each item first, such as <code>results</code></td></tr>
+<tr><td>filter</td><td>Keep items where a condition holds</td></tr>
+<tr><td>dedupe</td><td>Keep the first item per key; normalize URLs or text so near-duplicates match</td></tr>
+<tr><td>sort</td><td>Sort by one or more keys; a rank map orders words such as high, medium, low</td></tr>
+<tr><td>limit</td><td>Keep the first n items</td></tr>
+<tr><td>enumerate</td><td>Number the items</td></tr>
+<tr><td>map</td><td>Build a new object per item, or add fields to it</td></tr>
+<tr><td>pick</td><td>Keep only listed fields</td></tr>
+<tr><td>lookup</td><td>Join: attach matching items from another list, like a spreadsheet lookup</td></tr>
+<tr><td>render</td><td>Replace the value with a template built from it</td></tr>
+</tbody></table>
+
+<h2 id="router">9. Routers</h2>
+<p>A router checks its routes top to bottom and follows the first that matches; otherwise it follows <b>else</b>. Each route has a left value, a comparison and a right value, for example <code>{{ nodes.collect_articles | length }}</code> greater than <code>0</code>. Each route has its own circle on the card's right edge; drag from it to the step that should follow. An unconnected route ends the agent.</p>
+
+<h2 id="parallel">10. Repeat and run in parallel</h2>
+<ul>
+<li><b>Repeat for each item:</b> switch it on in any tool, LLM or transform step. Choose the list, a name for the current item, the most items to process, and <b>Concurrency</b>, how many run at once. The step's output is a list of results in the same order.</li>
+<li>If one item fails the others continue by default, and the failed item's result is empty. Set <b>On item error</b> to stop instead.</li>
+<li><b>Parallel branches:</b> connect one step to several. Where branches meet, set <b>When several branches lead here</b> to <b>Wait for all</b> so the step runs once with every branch's output. Leave it on <b>Run per branch</b> when a router chose between the branches.</li>
+<li>Every call in every branch counts against the agent's budget, so parallel work cannot overspend.</li>
+</ul>
+
+<h2 id="settings">11. Inputs, output and budgets</h2>
+<p>Click empty canvas to open the agent's settings.</p>
+<ul>
+<li><b>Inputs</b> are the values a run starts with, such as country and sector. Each has a type, an optional default and a description. They become the arguments of the agent's MCP tool.</li>
+<li><b>Output</b> is what a run returns and what MCP callers receive. Pick one step's output, or write a JSON template that combines several.</li>
+<li><b>Budgets</b> cap tool calls, LLM calls and total steps per run. A run that hits a cap stops that work and reports it.</li>
+</ul>
+
+<h2 id="save">12. Validate, save and versions</h2>
+<ul>
+<li><b>Validate</b> checks the whole agent against the live tool list: missing steps, unknown tools, missing required arguments, references to steps that do not exist, and steps that can never run. Click a problem to jump to its step.</li>
+<li><b>Save</b> (or Ctrl+S) stores a new version even with problems, so you never lose work. Published agents that are saved with errors are unpublished automatically.</li>
+<li>If a colleague saved while you were editing, you are told and nothing is overwritten. Reload to see their version.</li>
+<li><b>Versions</b> in the agent settings lists every save with who and when. Every run records the version it used.</li>
+</ul>
+
+<h2 id="run">13. Run and read the results</h2>
+<ol>
+<li>Select <b>Run</b>. Fill in or keep the input values and confirm.</li>
+<li>The run page shows each step as it runs, finishes, fails or is skipped, with the path taken highlighted.</li>
+<li>The left panel is the trace in execution order with durations. Click a step to see its output and every tool and LLM call it made, including the exact prompt sent.</li>
+<li>The right panel shows the run's output, inputs, call counts against budget, and any error.</li>
+</ol>
+
+<h2 id="publish">14. Publish as an MCP tool</h2>
+<p>Select <b>Publish</b> in the builder. The agent must pass validation first. Published agents are tools on this product's MCP endpoint:</p>
+<pre class="json">All published agents         POST https://&lt;host&gt;/mcp
+One category only            POST https://&lt;host&gt;/mcp/category/&lt;category-slug&gt;
+Authentication               Authorization: Bearer &lt;API key&gt;</pre>
+<ul>
+<li>The tool name is the agent id. The description starts with the category in brackets. The arguments are the agent's inputs.</li>
+<li>The result is the agent's output as JSON. Each call is recorded as a run with trigger <code>mcp</code> and the key's name.</li>
+<li>A super admin issues API keys and can limit a key to some categories.</li>
+</ul>
+<h3>Connect a client</h3>
+<p>Any MCP client that speaks Streamable HTTP can connect. For a SAJHA-style registry or this product's own server list, add:</p>
+<pre class="json">"credit_risk_agents": {
+  "transport": "mcp_http",
+  "url": "https://&lt;host&gt;/mcp/category/credit-risk",
+  "headers": {"Authorization": "Bearer ${JSONFLOW_API_KEY}"}
+}</pre>
+
+<h2 id="compose">15. Agents that call agents</h2>
+<p>Published agents also appear in the palette under <b>agents</b>, so one agent can use another as a step. An agent cannot call itself or an agent already in its chain, and chains stop at three levels. The inner agent's run is recorded separately with trigger <code>agent</code>.</p>
+
+<h2 id="super">16. Super admin tasks</h2>
+<p>Open <b>Admin</b> in the top bar.</p>
+<ul>
+<li><b>Users:</b> create admins and super admins, change roles, disable accounts and reset passwords. Disabling or changing a role signs the person out. At least one active super admin always remains, and you cannot demote or disable yourself.</li>
+<li><b>Categories:</b> add categories, or delete one that no agent uses.</li>
+<li><b>MCP servers:</b> edit the server list. Each server has a transport (<code>sajha_rest</code> for SAJHA, <code>mcp_http</code> for any standard MCP server), an address, authentication by environment variable, and allow and deny lists of tool name patterns. <b>Test</b> lists a server's tools live. Keep write tools such as <code>*_send_*</code> and <code>*_delete_*</code> on the deny list.</li>
+<li><b>Model:</b> choose Anthropic or any OpenAI-compatible endpoint, the default model, and the name of the environment variable that holds the key. Keys are never typed into the app. <b>Test</b> sends a one-line prompt.</li>
+<li><b>API keys:</b> create a key for each MCP client, optionally limited to categories. The key is shown once. Revoke keys that are no longer used.</li>
+<li><b>Audit log:</b> sign-ins, saves, publishes, settings changes, user changes and key changes, newest first.</li>
+</ul>
+<h3>First start</h3>
+<pre class="json">python -m jsonflow.server create-user --username you --role super_admin
+python -m jsonflow.server serve --host 0.0.0.0 --port 8080</pre>
+<p>Add <code>--demo</code> to <code>serve</code> to explore with synthetic search results and scripted model answers, without network access or keys.</p>
+
+<h2 id="trouble">17. Troubleshooting</h2>
+<table class="tbl">
+<thead><tr><th>Message</th><th>What to do</th></tr></thead>
+<tbody>
+<tr><td>references unknown node 'nodes.x'</td><td>A value points at a step that was renamed or deleted. Pick the value again.</td></tr>
+<tr><td>'nodes.x' is not available</td><td>That step did not run on this path, often because a router skipped it. Add <code>| default(...)</code> or connect the steps differently.</td></tr>
+<tr><td>missing required tool args</td><td>Fill in the arguments marked required.</td></tr>
+<tr><td>arguments do not match the tool schema</td><td>A value has the wrong type or range. The message names the field.</td></tr>
+<tr><td>tool ... is blocked by the server allowlist</td><td>A super admin has hidden that tool. Ask them if it should be allowed.</td></tr>
+<tr><td>budget ... reached</td><td>Raise the budget in agent settings, or reduce items in repeated steps.</td></tr>
+<tr><td>output failed schema validation</td><td>The model's answer did not fit the output schema twice. Simplify the schema or make the prompt more explicit.</td></tr>
+<tr><td>N branches lead here</td><td>Several branches meet at a step. Choose Wait for all if they run in parallel.</td></tr>
+<tr><td>unreachable from the start node</td><td>Connect the step, or delete it.</td></tr>
+</tbody></table>
+</article>
+</div>
+<footer class="footer">jsonflow guide</footer>
+</body>
+</html>

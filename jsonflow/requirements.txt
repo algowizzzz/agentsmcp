@@ -6,3 +6,9 @@ httpx>=0.27
 jsonschema>=4.19
 anthropic>=0.40
 pytest>=8.0
+
+# Web product (python -m jsonflow.server)
+fastapi>=0.110
+uvicorn>=0.29
+# Optional: browser walkthrough in tests/jsonflow_browser_e2e.py
+# playwright>=1.40

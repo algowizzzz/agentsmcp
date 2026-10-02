@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign in · jsonflow</title>
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/static/app.css">
+<script src="/static/common.js" defer></script>
+<script src="/static/login.js" defer></script>
+</head>
+<body data-page="login">
+<header id="topbar" class="topbar"></header>
+<main class="login-wrap">
+  <form id="login" class="card login-card" novalidate>
+    <h1 style="font-size:20px">Sign in</h1>
+    <p class="muted" style="margin:0">Use the account your super admin created for you.</p>
+    <label class="field"><span class="lbl">Username</span><input class="input" name="username" autocomplete="username" required></label>
+    <label class="field"><span class="lbl">Password</span><input class="input" name="password" type="password" autocomplete="current-password" required></label>
+    <div id="err" class="notice bad hidden" role="alert"></div>
+    <button class="btn primary" type="submit" style="justify-content:center">Sign in</button>
+    <a class="small" href="/guide#roles">Who can sign in?</a>
+  </form>
+</main>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Builder · jsonflow</title>
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/static/app.css">
+<script src="/static/common.js" defer></script>
+<script src="/static/graph.js" defer></script>
+<script src="/static/builder.js" defer></script>
+</head>
+<body class="builder">
+<header class="topbar" id="bar">
+  <a class="brand" href="/app" aria-label="Back to agents"><span class="brand-mark">{ }</span></a>
+  <a href="/app" class="small">Agents</a><span class="muted" aria-hidden="true">/</span>
+  <span id="agent-name" style="font-weight:600"></span>
+  <span id="agent-meta" class="row small"></span>
+  <span id="dirty" class="chip warn hidden">Unsaved</span>
+  <div class="grow"></div>
+  <button id="btn-json" class="btn small" type="button">JSON</button>
+  <button id="btn-validate" class="btn small" type="button">Validate</button>
+  <button id="btn-save" class="btn small" type="button" title="Ctrl+S">Save</button>
+  <button id="btn-publish" class="btn small" type="button">Publish</button>
+  <button id="btn-run" class="btn primary small" type="button">Run</button>
+</header>
+<div class="workspace">
+  <aside class="palette" aria-label="Step palette">
+    <div style="padding:14px 14px 8px" class="stack">
+      <div class="row"><b>Steps</b><div class="grow"></div><button id="pal-refresh" class="btn small ghost" type="button" title="Reload the tool list from the servers">Refresh</button></div>
+      <input id="pal-search" class="input" type="search" placeholder="Search tools" aria-label="Search tools">
+      <span class="small muted">Drag onto the canvas, or click to add.</span>
+    </div>
+    <div id="pal-list" class="palette-list"></div>
+    <div id="pal-status" class="small muted" style="padding:10px 14px;border-top:1px solid var(--line)"></div>
+  </aside>
+  <div style="flex:1;display:flex;flex-direction:column;min-width:0">
+    <div id="canvas" class="canvas-wrap" tabindex="-1" aria-label="Canvas">
+      <div class="canvas-tools" role="toolbar" aria-label="Canvas tools">
+        <button class="btn small ghost" type="button" id="z-out" aria-label="Zoom out">−</button>
+        <span id="z-val" class="small" style="align-self:center;min-width:42px;text-align:center">100%</span>
+        <button class="btn small ghost" type="button" id="z-in" aria-label="Zoom in">+</button>
+        <button class="btn small ghost" type="button" id="z-fit">Fit</button>
+        <button class="btn small ghost" type="button" id="z-tidy">Tidy</button>
+      </div>
+      <div id="world" class="world"></div>
+    </div>
+    <div id="problems" class="problems hidden" aria-live="polite"></div>
+  </div>
+  <aside class="inspector" aria-label="Inspector">
+    <div id="insp-head" class="insp-head"></div>
+    <div id="insp-body" class="insp-body"></div>
+  </aside>
+</div>
+</body>
+</html>

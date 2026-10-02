@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>jsonflow · agents from your MCP tools</title>
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/static/app.css">
+<script src="/static/common.js" defer></script>
+<script src="/static/public.js" defer></script>
+</head>
+<body data-page="home">
+<header id="topbar" class="topbar"></header>
+
+<main>
+<section class="hero">
+  <div>
+    <span class="chip info">For risk and research teams</span>
+    <h1 style="margin-top:14px">Build agents from your MCP tools. Draw them, don't code them.</h1>
+    <p class="lead">jsonflow turns the tools on your MCP servers into building blocks. Drag search, data and document tools onto a canvas, add LLM steps, connect them, and run. Every agent you publish becomes an MCP tool itself, so other systems can call it.</p>
+    <div class="row" style="flex-wrap:wrap">
+      <a class="btn primary" href="/login" data-when-signed-out>Sign in</a>
+      <a class="btn primary hidden" href="/app" data-when-signed-in>Open your agents</a>
+      <a class="btn" href="/guide">Read the guide</a>
+    </div>
+  </div>
+  <div class="card mini-flow" aria-label="Example agent">
+    <div class="small muted">Example: sector event discovery</div>
+    <div class="mini-par">
+      <div class="mini-node"><span class="ico web"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18z"/></svg></span><span><b class="mono">news search</b><br><span class="small muted">4 queries in parallel</span></span></div>
+      <div class="mini-node"><span class="ico structured"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M3 15h18M9 4v16"/></svg></span><span><b class="mono">customer book</b><br><span class="small muted">SQL query</span></span></div>
+    </div>
+    <div class="mini-arrow"></div>
+    <div class="mini-node"><span class="ico transform"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg></span><span><b class="mono">dedupe and rank</b><br><span class="small muted">transform, no code</span></span></div>
+    <div class="mini-arrow"></div>
+    <div class="mini-node"><span class="ico llm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span><span><b class="mono">extract events</b><br><span class="small muted">LLM with a JSON schema</span></span></div>
+    <div class="mini-arrow"></div>
+    <div class="mini-node"><span class="ico router"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 3v12"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg></span><span><b class="mono">anything material?</b><br><span class="small muted">router</span></span></div>
+  </div>
+</section>
+
+<section class="band">
+  <h2>How it works</h2>
+  <p class="sub">An agent is a flow of steps you can see. The flow decides the order; models only work inside the steps you give them.</p>
+  <div class="cols-3">
+    <div class="card feature"><span class="step-num">1</span><h3>Connect your tools</h3><p>A super admin registers MCP servers once. Their tools appear in the palette, grouped as web, structured data and documents. Write tools such as send or delete stay hidden.</p></div>
+    <div class="card feature"><span class="step-num">2</span><h3>Draw the agent</h3><p>Drag tools and LLM steps onto the canvas and connect them. Each tool's settings form comes from its own schema. Values are fixed, picked from earlier steps, or written as expressions.</p></div>
+    <div class="card feature"><span class="step-num">3</span><h3>Run and publish</h3><p>Validate, run, and inspect every step's input and output. Publish the agent and it becomes an MCP tool in its category, ready for other agents and systems.</p></div>
+  </div>
+</section>
+
+<section class="band">
+  <h2>Building blocks</h2>
+  <p class="sub">Five kinds of step cover most work.</p>
+  <div class="cols-3">
+    <div class="card feature"><span class="ico web"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18z"/></svg></span><h3>Tool</h3><p>Any tool from a connected MCP server: news and web search, SQL, documents, filings. Arguments are checked against the tool's schema before every call.</p></div>
+    <div class="card feature"><span class="ico llm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span><h3>LLM call</h3><p>A prompt with data from earlier steps. Give it an output schema and the answer comes back as checked JSON, with one automatic correction if it is off.</p></div>
+    <div class="card feature"><span class="ico transform"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg></span><h3>Transform</h3><p>Flatten, filter, dedupe, sort, limit, join and reshape data without code or tokens.</p></div>
+    <div class="card feature"><span class="ico router"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 3v12"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg></span><h3>Router</h3><p>Branch on a condition, for example skip the LLM when a search returned nothing.</p></div>
+    <div class="card feature"><span class="ico transform"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a3 3 0 0 1 3-3h15"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a3 3 0 0 1-3 3H3"/></svg></span><h3>Repeat and parallel</h3><p>Run any step once per item of a list, many at a time. Split the flow into branches that run side by side and join again.</p></div>
+    <div class="card feature"><span class="ico agents"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg></span><h3>Other agents</h3><p>Published agents appear in the palette too, so one agent can call another. Loops between agents are refused.</p></div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="cols-2">
+    <div class="card feature">
+      <h3>Every agent is an MCP tool</h3>
+      <p>Publishing an agent adds it to this product's MCP endpoint. Each agent belongs to one category, and each category also has its own endpoint, so a client can see only, say, Credit Risk agents. API keys are issued by a super admin and can be limited to categories.</p>
+      <pre class="json">POST /mcp                       all published agents
+POST /mcp/category/credit-risk  one category only
+Authorization: Bearer jfk_…</pre>
+    </div>
+    <div class="card feature">
+      <h3>Built for controlled environments</h3>
+      <ul style="margin:0;padding-left:18px;color:var(--ink-2)">
+        <li>Two roles: admins build and run agents; super admins also manage users, categories, servers, the model and API keys.</li>
+        <li>Budgets cap tool calls, LLM calls and steps on every run.</li>
+        <li>Each run stores the exact agent version, every prompt, every tool call and every step's output.</li>
+        <li>Each save creates a version; the audit log records who changed what.</li>
+        <li>Works with Anthropic or any OpenAI-compatible model endpoint.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="band" style="text-align:center;padding-bottom:64px">
+  <h2>Ready to build one?</h2>
+  <p class="sub" style="margin:8px auto 20px">The guide walks through a complete agent in about fifteen minutes.</p>
+  <div class="row" style="justify-content:center">
+    <a class="btn primary" href="/guide">Open the guide</a>
+    <a class="btn" href="/login" data-when-signed-out>Sign in</a>
+  </div>
+</section>
+</main>
+<footer class="footer">jsonflow runs on your servers. Agents produce research for people to act on; they take no actions in other systems unless you give them tools that do.</footer>
+</body>
+</html>

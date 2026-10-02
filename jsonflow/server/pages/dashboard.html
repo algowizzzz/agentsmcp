@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agents · jsonflow</title>
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/static/app.css">
+<script src="/static/common.js" defer></script>
+<script src="/static/dashboard.js" defer></script>
+</head>
+<body>
+<header id="topbar" class="topbar"></header>
+<main class="page">
+  <div class="page-head">
+    <h1>Agents</h1>
+    <span id="count" class="chip"></span>
+    <div class="grow"></div>
+    <input id="search" class="input" type="search" placeholder="Search agents" aria-label="Search agents" style="width:240px">
+    <button id="new" class="btn primary" type="button">New agent</button>
+  </div>
+  <div id="filters" class="row" style="flex-wrap:wrap;margin-bottom:6px" role="group" aria-label="Category filter"></div>
+  <div class="grid-2">
+    <section id="agents" aria-label="Agents by category"></section>
+    <aside class="stack" style="gap:16px">
+      <section class="card" style="padding:16px">
+        <div class="row" style="margin-bottom:10px"><h2 style="font-size:15px">Recent runs</h2><div class="grow"></div><span class="small muted">all triggers</span></div>
+        <div id="runs" class="stack" style="gap:2px"></div>
+      </section>
+      <section class="card" style="padding:16px" aria-labelledby="mcp-h">
+        <h2 id="mcp-h" style="font-size:15px;margin-bottom:6px">Use agents from other tools</h2>
+        <p class="small muted" style="margin:0 0 10px">Published agents are MCP tools. Clients need an API key from a super admin.</p>
+        <div id="mcp" class="stack small"></div>
+      </section>
+    </aside>
+  </div>
+</main>
+</body>
+</html>

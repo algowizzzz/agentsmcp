@@ -142,6 +142,7 @@ class Workflow(_Base):
     version: str = "0.1.0"
     name: str = ""
     description: str = ""
+    category: str = Field("", description="Business category, e.g. 'Credit Risk'. Groups agents in the app and on MCP.")
     inputs: dict[str, InputParam] = Field(default_factory=dict)
     budgets: Budgets = Field(default_factory=Budgets)
     defaults: dict[str, Any] = Field(default_factory=dict, description="Defaults for llm nodes: provider, model.")
@@ -151,6 +152,7 @@ class Workflow(_Base):
     )
     start: Optional[str] = None
     output: Any = None
+    ui: dict[str, Any] = Field(default_factory=dict, description="Editor metadata (viewport). Ignored by the engine.")
 
     # Not part of the JSON document; set by load_workflow.
     base_dir: Optional[Path] = Field(None, exclude=True)

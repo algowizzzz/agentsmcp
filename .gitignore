@@ -4,3 +4,4 @@
 runs/
 __pycache__/
 .pytest_cache/
+jsonflow_data/

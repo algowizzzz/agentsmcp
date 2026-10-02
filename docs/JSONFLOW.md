@@ -31,6 +31,37 @@ python -m pytest tests/jsonflow_tests -q
 
 Every run writes `runs/<run_id>/`: the exact workflow and its hash, inputs, copies of prompt files, one JSON file per node output, one file per tool and LLM call (rendered prompt, arguments, raw result), `trace.jsonl` and `result.json`. Secrets in arguments are redacted.
 
+## The product: web app and MCP endpoint
+
+`python -m jsonflow.server` runs jsonflow as a product: a public explainer home page and guide, sign-in, an agents dashboard, the drag-and-drop builder, run history and a super admin page. Published agents are served as MCP tools.
+
+```bash
+pip install -r jsonflow/requirements.txt
+python -m jsonflow.server create-user --username you --role super_admin   # prompts for a password
+python -m jsonflow.server serve --host 0.0.0.0 --port 8080                 # add --demo for offline fixtures
+```
+
+| Page | Path | Who |
+|---|---|---|
+| Explainer home page | `/` | everyone |
+| Guide | `/guide` | everyone |
+| Agents dashboard | `/app` | admin, super admin |
+| Builder | `/app/agents/<id>` | admin, super admin |
+| Run view | `/app/runs/<id>` | admin, super admin |
+| Admin: users, categories, MCP servers, model, API keys, audit log | `/app/admin` | super admin |
+
+**Roles.** Only two. Admins build, edit, validate, run and publish agents and see every run. Super admins also delete agents and manage users, categories, MCP servers, the default model, API keys and the audit log. There is no self sign-up, and at least one active super admin always remains.
+
+**Agents.** Each agent belongs to one category. Every save is a new version, and every run records the version it used. Saving never fails on validation problems, but publishing and running require a valid agent, and a published agent saved with errors is unpublished.
+
+**Agents as MCP tools.** Published agents are tools on `POST /mcp`, and each category has its own endpoint, `POST /mcp/category/<slug>`. The tool name is the agent id, the arguments are its inputs, the description starts with the category, and the result is the agent's output. Clients authenticate with `Authorization: Bearer <key>`; super admins create keys and can limit them to categories. Every call is a recorded run with trigger `mcp`.
+
+**Agents calling agents.** Published agents also appear in the builder palette under "agents" as an in-process server, so one agent can use another as a step. Self-calls and loops are refused and chains stop at three levels.
+
+**Storage.** One SQLite file plus run folders under `--data-dir` (default `jsonflow_data/`). Passwords are hashed with scrypt; sessions and API keys are stored only as hashes. Model and server keys are referenced by environment variable name, never stored.
+
+**Security controls.** Session cookies are HttpOnly and SameSite=Lax, and Secure over HTTPS. State-changing API calls need a custom request header, which blocks cross-site form posts. Pages send a strict Content-Security-Policy with no inline scripts. Sign-in locks for five minutes after five failures. Run artifact paths are validated against traversal.
+
 ## Layout
 
 | Path | Purpose |
@@ -46,6 +77,7 @@ Every run writes `runs/<run_id>/`: the exact workflow and its hash, inputs, copi
 | `config/jsonflow/servers.json` | MCP server registry, allowlists, category rules |
 | `config/jsonflow/workflows/` | Workflows and their prompt files |
 | `config/jsonflow/fixtures/` | Synthetic SAJHA and LLM responses for offline runs |
+| `jsonflow/server/` | Web product: FastAPI app, services, SQLite storage, MCP endpoint, pages and static assets |
 
 ## Document format
 
@@ -176,7 +208,8 @@ Default budget: 10 tool calls and 4 LLM calls. A normal run uses 7 and 2.
 
 ## Verification so far
 
-- **Unit and end-to-end tests:** 91 tests, all passing, with synthetic fixtures and mocked HTTP transports. One runs the whole sector workflow with both LLM nodes going through the OpenAI-compatible HTTP path.
+- **Unit and end-to-end tests:** 101 tests, all passing, including the web API, roles and the MCP endpoint over real HTTP, with synthetic fixtures and mocked HTTP transports. One runs the whole sector workflow with both LLM nodes going through the OpenAI-compatible HTTP path.
+- **Browser walkthrough:** `tests/jsonflow_browser_e2e.py` drives Chromium through the public pages, sign-in, the builder, a run, building and publishing a new agent by drag and drop, and every admin tab, with zero console errors.
 - **Live SAJHA:** the archived v2.9.8 server from mcp-intelligence-agent was run locally. Discovery, categorization, palette export and validation worked against its real catalog. Its real responses exposed one bug, a tool failure nested inside a success envelope, which is now fixed and covered by a test.
 - **Live Tavily through SAJHA:** all 7 tool calls succeeded in about 8 seconds. 20 real articles were deduplicated to 15, and the trusted-domain searches returned sec.gov, cftc.gov and reuters.com results.
 - **Not yet verified live:** the two LLM nodes, on any provider. No model credentials were available, so those ran on scripted or mocked answers.

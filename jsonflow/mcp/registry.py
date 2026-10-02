@@ -39,7 +39,7 @@ from typing import Any, Optional
 from jsonflow.errors import SpecError, ToolError
 from jsonflow.mcp.base import MCPClient, ToolInfo
 
-CATEGORIES = ("structured", "unstructured", "web", "other")
+CATEGORIES = ("structured", "unstructured", "web", "agents", "other")
 _ENV_RE = re.compile(r"\$\{([A-Za-z_][A-Za-z0-9_]*)(?::-([^}]*))?\}")
 
 

@@ -68,8 +68,10 @@ class RunContext:
         llm_providers: Optional[dict[str, LLMProvider]] = None,
         run_dir: Optional[Path] = None,
         run_id: Optional[str] = None,
+        llm_defaults: Optional[dict[str, Any]] = None,
     ) -> None:
         self.workflow = workflow
+        self.llm_defaults = dict(llm_defaults or {})
         self.registry = registry
         self.run_id = run_id or f"{datetime.now(timezone.utc):%Y%m%dT%H%M%SZ}-{uuid.uuid4().hex[:6]}"
         self.started_at = _now()
@@ -188,8 +190,11 @@ def run_llm(node: LLMNode, ctx: RunContext, scope: dict[str, Any], label: str) -
     prompt_t = node.prompt or _read_text(ctx, node.prompt_file)
     system = _as_prompt(render(system_t, scope)) if system_t else None
     prompt = _as_prompt(render(prompt_t, scope))
-    provider_name = node.provider or ctx.workflow.defaults.get("provider") or default_provider()
-    model = node.model or ctx.workflow.defaults.get("model") or default_model(provider_name)
+    provider_name = (node.provider or ctx.workflow.defaults.get("provider")
+                     or ctx.llm_defaults.get("provider") or default_provider())
+    model = (node.model or ctx.workflow.defaults.get("model")
+             or (ctx.llm_defaults.get("model") if provider_name == ctx.llm_defaults.get("provider") else None)
+             or default_model(provider_name))
     provider = ctx.provider(provider_name)
     schema = node.output_schema
     validator = jsonschema.validators.validator_for(schema)(schema) if schema else None
