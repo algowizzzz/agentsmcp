@@ -106,6 +106,18 @@ def validate_workflow(wf: Workflow, registry: Optional[ServerRegistry] = None) -
         if ref not in ids:
             report.errors.append(f"output: references unknown node 'nodes.{ref}'")
 
+    # Branches that meet at one node.
+    from jsonflow.engine import static_predecessors
+
+    preds = static_predecessors(wf)
+    router_targets = {t for n in wf.nodes if isinstance(n, RouterNode) for t in [r.goto for r in n.routes] + [n.default]}
+    for n in wf.nodes:
+        if n.join == "all" and n.id in router_targets:
+            report.errors.append(f"{n.id}: join 'all' cannot be a router target (a skipped route would block it forever)")
+        elif n.join == "any" and len(preds[n.id]) > 1:
+            report.warnings.append(f"{n.id}: {len(preds[n.id])} branches lead here; it runs once per branch that arrives. "
+                                   "Set join to 'all' if those branches run in parallel.")
+
     # Reachability from the start node.
     succ = successors(wf)
     seen, stack = set(), [wf.start or wf.nodes[0].id]

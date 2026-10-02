@@ -56,7 +56,7 @@ def test_full_run(workflow_path, servers_config, sajha_fixture, llm_fixture, tmp
     assert len(domain_calls) == 3
     assert all(c["arguments"]["include_domains"][0] == "reuters.com" for c in domain_calls)
     assert [e["validation"]["validation_status"] for e in events] == ["corroborated", "corroborated", "not_found"]
-    assert all(e["review_status"] == "AI-generated" for e in events)
+    assert all("review_status" not in e for e in events)
 
     # Budgets and LLM calls.
     assert result.stats["tool_calls"] == 7 and result.stats["llm_calls"] == 2

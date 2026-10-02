@@ -48,6 +48,9 @@ class _NodeBase(_Base):
     description: str = ""
     on_error: Literal["fail", "continue"] = "fail"
     next: Optional[str] = Field(None, description="Successor when 'edges' is omitted. Defaults to the next listed node; 'END' stops.")
+    join: Literal["any", "all"] = Field(
+        "any", description="With several incoming branches: 'all' waits for every one and runs once; 'any' runs as each arrives."
+    )
     ui: dict[str, Any] = Field(default_factory=dict, description="Canvas metadata (position, colour). Ignored by the engine.")
 
 

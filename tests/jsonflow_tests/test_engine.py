@@ -11,6 +11,7 @@ from jsonflow.mcp.fixture import FixtureClient
 from jsonflow.mcp.registry import ServerRegistry
 from jsonflow.runner import run_workflow
 from jsonflow.spec import parse_workflow
+from jsonflow.validate import validate_workflow
 
 TOOLS = {
     "tools": [{"name": "search", "inputSchema": {"type": "object", "properties": {"query": {"type": "string"},
@@ -173,3 +174,53 @@ def test_anthropic_provider_text_and_missing_tool():
     assert text.complete(LLMRequest(node_id="x", prompt="p", model="m")).text == "hi"
     with pytest.raises(LLMError, match="did not return structured output"):
         text.complete(LLMRequest(node_id="x", prompt="p", model="m", output_schema={"type": "object"}))
+
+
+# ------------------------------------------------------------- parallelism
+def _branchy(join):
+    return {"id": "t", "nodes": [
+        {"id": "start", "type": "transform", "input": 1},
+        {"id": "b", "type": "tool", "server": "s", "tool": "search", "args": {"query": "x"}},
+        {"id": "b2", "type": "transform", "input": "{{ nodes.b.results | length }}"},
+        {"id": "c", "type": "tool", "server": "s", "tool": "search", "args": {"query": "y"}},
+        {"id": "joined", "type": "transform", "join": join, "input": "{{ nodes.b2 }}-{{ nodes.c.results | length }}"}],
+        "edges": [["start", "b"], ["start", "c"], ["b", "b2"], ["b2", "joined"], ["c", "joined"]],
+        "output": "{{ nodes.joined }}"}
+
+
+def test_uneven_parallel_branches_join_all_runs_once(tmp_path):
+    result, client, _ = _run(_branchy("all"), tmp_path=tmp_path)
+    assert result.status == "succeeded" and result.output == "1-1"
+    assert sum(1 for e in result.trace if e["event"] == "node_start" and e["node"] == "joined") == 1
+    assert len(client.calls) == 2
+
+
+def test_join_any_runs_per_branch_and_warns(tmp_path):
+    result, _, _ = _run(_branchy("any"), tmp_path=tmp_path)
+    # c arrives first while b2 has not run yet, so the first run fails on the missing reference
+    assert result.status == "failed" and "nodes.b2" in result.error
+    assert any("branches lead here" in w for w in validate_workflow(parse_workflow(_branchy("any"))).warnings)
+
+
+def test_join_all_cannot_be_router_target():
+    doc = {"id": "t", "nodes": [
+        {"id": "r", "type": "router", "routes": [{"when": {"left": 1, "op": "truthy"}, "goto": "a"}], "default": "a"},
+        {"id": "a", "type": "transform", "join": "all", "input": 1}]}
+    assert any("cannot be a router target" in e for e in validate_workflow(parse_workflow(doc)).errors)
+
+
+def test_parallel_for_each_is_concurrent(tmp_path):
+    import threading
+    import time as _time
+
+    class Slow(FixtureClient):
+        def call_tool(self, tool, arguments, timeout=None):
+            _time.sleep(0.3)
+            return {"results": [threading.current_thread().name]}
+
+    reg = ServerRegistry({"servers": {"s": {}}}, clients={"s": Slow("s", TOOLS)})
+    doc = {"id": "t", "nodes": [{**_for_each(["a", "b", "c", "d"]), "concurrency": 4}]}
+    t0 = _time.time()
+    result = run_workflow(parse_workflow(doc), registry=reg, run_dir=tmp_path)
+    assert result.status == "succeeded" and _time.time() - t0 < 0.9
+    assert len({r["results"][0] for r in result.nodes["loop"]}) == 4

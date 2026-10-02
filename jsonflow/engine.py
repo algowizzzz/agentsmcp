@@ -341,17 +341,37 @@ def successors(wf: Workflow) -> dict[str, list[str]]:
     return out
 
 
+def static_predecessors(wf: Workflow) -> dict[str, list[str]]:
+    """Incoming plain edges per node (router routes excluded)."""
+    succ = successors(wf)
+    preds: dict[str, list[str]] = {n.id: [] for n in wf.nodes}
+    for n in wf.nodes:
+        if isinstance(n, RouterNode):
+            continue
+        for t in succ[n.id]:
+            if t != END:
+                preds[t].append(n.id)
+    return preds
+
+
 def compile_workflow(wf: Workflow, ctx: RunContext):
     g = StateGraph(FlowState)
     for n in wf.nodes:
         g.add_node(n.id, _make_node_fn(n, ctx))
     g.add_edge(START, wf.start or wf.nodes[0].id)
     lg = lambda t: LG_END if t == END else t  # noqa: E731
+    succ = successors(wf)
+    preds = static_predecessors(wf)
+    # A node with join "all" and 2+ incoming branches gets one LangGraph join edge,
+    # so it runs once after every branch has finished.
+    joined = {n.id for n in wf.nodes if n.join == "all" and len(preds[n.id]) > 1}
     for n in wf.nodes:
-        targets = successors(wf)[n.id]
         if isinstance(n, RouterNode):
-            g.add_conditional_edges(n.id, lambda s, nid=n.id: lg(s["nodes"][nid]["goto"]), {lg(t): lg(t) for t in targets})
+            g.add_conditional_edges(n.id, lambda s, nid=n.id: lg(s["nodes"][nid]["goto"]), {lg(t): lg(t) for t in succ[n.id]})
         else:
-            for t in targets:
-                g.add_edge(n.id, lg(t))
+            for t in succ[n.id]:
+                if t not in joined:
+                    g.add_edge(n.id, lg(t))
+    for target in joined:
+        g.add_edge(preds[target], target)
     return g.compile()

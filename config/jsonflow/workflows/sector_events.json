@@ -2,7 +2,7 @@
   "id": "sector_events",
   "version": "1.0.0",
   "name": "Sector event discovery",
-  "description": "Phase 1 of sector-to-customer news intelligence: discover recent news for one country and sector, extract and cluster material events, rank the top events and corroborate them on trusted domains. Produces research intelligence for analyst review, never credit decisions.",
+  "description": "Phase 1 of sector-to-customer news intelligence: discover recent news for one country and sector, extract and cluster material events, rank the top events and corroborate them on trusted domains. Produces research intelligence; it never takes credit actions.",
   "inputs": {
     "country": {
       "type": "string",
@@ -476,7 +476,7 @@
       "id": "assemble_report",
       "type": "transform",
       "next": "END",
-      "description": "Final event list for analyst review.",
+      "description": "Final event list with validation attached.",
       "input": "{{ nodes.rank_events }}",
       "steps": [
         {
@@ -486,13 +486,6 @@
           "match": "event_id",
           "as": "validation",
           "single": true
-        },
-        {
-          "op": "map",
-          "merge": true,
-          "fields": {
-            "review_status": "AI-generated"
-          }
         }
       ]
     },
@@ -511,7 +504,6 @@
     "articles_considered": "{{ nodes.collect_articles | length }}",
     "excluded_article_refs": "{{ nodes.extract_events.excluded_refs | default([]) }}",
     "events": "{{ nodes.assemble_report | default([]) }}",
-    "note": "{{ nodes.no_news | default(null) }}",
-    "review_status": "AI-generated: requires analyst review. No credit action is taken by this workflow."
+    "note": "{{ nodes.no_news | default(null) }}"
   }
 }

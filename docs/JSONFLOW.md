@@ -61,7 +61,13 @@ Every run writes `runs/<run_id>/`: the exact workflow and its hash, inputs, copi
 }
 ```
 
-Without `edges`, nodes run in listed order. A node's `next` overrides its successor, and `"END"` stops. Routers choose their successor from `routes`. Every node accepts `description`, `on_error` (`fail` or `continue`) and `ui`, which holds canvas metadata the engine ignores.
+Without `edges`, nodes run in listed order. A node's `next` overrides its successor, and `"END"` stops. Routers choose their successor from `routes`. Every node accepts `description`, `on_error` (`fail` or `continue`), `join` (see below) and `ui`, which holds canvas metadata the engine ignores.
+
+### Parallel execution
+
+- **Inside a loop:** a `for_each` with `concurrency: N` runs up to N items at once. Tool and LLM bodies both work. Budgets are shared and thread-safe.
+- **Across branches:** with `edges`, one node can lead to several. Those branches run at the same time.
+- **Where branches meet:** set `"join": "all"` on the meeting node so it waits for every branch and runs once. The default `"any"` runs it each time a branch arrives, which suits branches a router chose between. Validation warns when several branches meet at a node left on `"any"`, and rejects `"all"` on a router target, because a skipped route would block it forever.
 
 ### Node types
 
@@ -164,13 +170,13 @@ The remaining 16 tools are blocked by `deny_tools`: anything that sends, replies
 | `validate_events` | for_each → `tavily_domain_search` | One trusted-domain search per top event |
 | `validation_digest` | transform | Pair each event with its validation results |
 | `assess_validation` | llm | Corroborated, partially corroborated, not found, contradicted or not checked |
-| `assemble_report` | transform | Final events marked `AI-generated` for analyst review |
+| `assemble_report` | transform | Final event list with validation attached |
 
 Default budget: 10 tool calls and 4 LLM calls. A normal run uses 7 and 2.
 
 ## Verification so far
 
-- **Unit and end-to-end tests:** 87 tests, all passing, with synthetic fixtures and mocked HTTP transports. One runs the whole sector workflow with both LLM nodes going through the OpenAI-compatible HTTP path.
+- **Unit and end-to-end tests:** 91 tests, all passing, with synthetic fixtures and mocked HTTP transports. One runs the whole sector workflow with both LLM nodes going through the OpenAI-compatible HTTP path.
 - **Live SAJHA:** the archived v2.9.8 server from mcp-intelligence-agent was run locally. Discovery, categorization, palette export and validation worked against its real catalog. Its real responses exposed one bug, a tool failure nested inside a success envelope, which is now fixed and covered by a test.
 - **Live Tavily through SAJHA:** all 7 tool calls succeeded in about 8 seconds. 20 real articles were deduplicated to 15, and the trusted-domain searches returned sec.gov, cftc.gov and reuters.com results.
 - **Not yet verified live:** the two LLM nodes, on any provider. No model credentials were available, so those ran on scripted or mocked answers.
@@ -180,4 +186,4 @@ Default budget: 10 tool calls and 4 LLM calls. A normal run uses 7 and 2.
 - SAJHA's `tavily_news_search` fixes its 7-day lookback on the server side, so there is no `lookback_days` input yet.
 - Tavily scores below SAJHA's configured `min_score` still come through. Add a `filter` step on `item.score` if low-relevance articles crowd the list.
 - `assess_validation` is told to copy URLs exactly. A deterministic check that every `trusted_urls` entry appeared in the search results is not implemented yet.
-- No human-review gate node and no persistence of customer memory yet. Both belong to later phases.
+- No persistence of customer memory yet. That belongs to a later phase.
